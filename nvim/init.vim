@@ -38,7 +38,7 @@ Plug 'junegunn/vim-easy-align'
 
 Plug 'kshenoy/vim-signature'
 
-Plug 'https://github.com/junegunn/vim-github-dashboard.git'
+Plug 'lewis6991/gitsigns.nvim'
 Plug 'neovim/nvim-lspconfig'
 "Completion plugin 
 Plug 'hrsh7th/nvim-cmp'
@@ -49,7 +49,6 @@ Plug 'hrsh7th/cmp-buffer'
 
 Plug 'L3MON4D3/LuaSnip'
 
-" Plug 'simrat39/rust-tools.nvim'
 Plug 'mrcjkb/rustaceanvim'
 
 Plug 'windwp/nvim-autopairs'
@@ -58,12 +57,7 @@ Plug 'nvim-lua/plenary.nvim'
 
 Plug 'github/copilot.vim'
 
-" Plug 'olimorris/codecompanion.nvim', { 'tag': 'v16.3.0' }
 Plug 'rmagatti/auto-session'
-" After installing, add this to your init.vim:
-
-Plug 'nvim-lualine/lualine.nvim'
-
 Plug 'NickvanDyke/opencode.nvim'
 
 Plug 'folke/snacks.nvim'
@@ -100,7 +94,7 @@ Plug 'nvim-telescope/telescope-ui-select.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'smartpde/telescope-recent-files'
-Plug 'nvim-treesitter/nvim-treesitter', { 'do' : ':TSUpdate' }
+Plug 'nvim-treesitter/nvim-treesitter', { 'do' : ':TSUpdate', 'branch': 'master' }
 Plug 'nvim-treesitter/playground'
 
 Plug 'HiPhish/rainbow-delimiters.nvim'
@@ -113,6 +107,7 @@ Plug 'sindrets/diffview.nvim'
 Plug 'numToStr/Comment.nvim'
 
 Plug 'saecki/crates.nvim'
+" Plug 'paval-shlyk/crates.nvim', { 'branch': 'copilot/fix-feature-parsing-cargo-toml' }
 
 Plug 'rust-sailfish/sailfish', { 'rtp': 'syntax/vim' }
 

@@ -3,7 +3,7 @@
 
 require 'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all"
-  ensure_installed = { "c", "cpp", "lua", "rust", "java", "toml", "tact" },
+  ensure_installed = { "c", "cpp", "lua", "rust", "java", "toml", "tact", "xml" },
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
@@ -51,12 +51,12 @@ vim.api.nvim_create_autocmd('FileType', {
 require('mason').setup()
 require('mason-lspconfig').setup {
   automatic_enable = false,
-  ensure_installed = { 'lua_ls', 'taplo', 'yamlls', 'html', 'pyright', 'ts_ls', 'codebook', 'just', 'asm_lsp', 'buf_ls', 'digestif', 'golangci_lint_ls' }
+  ensure_installed = { 'lua_ls', 'taplo', 'yamlls', 'html', 'pyright', 'ts_ls', 'codebook', 'just', 'asm_lsp', 'buf_ls' }
 }
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
 local servers = { 'clangd', 'pyright', 'ts_ls', 'lua_ls',
-  'yamlls', 'digestif', 'taplo', 'buf_ls', 'sqlls', 'gopls', 'golangci_lint_ls',
+  'yamlls', 'digestif', 'taplo', 'buf_ls', 'sqlls',
   'html', 'codebook-lsp', 'just',
   'asm_lsp'
 }
