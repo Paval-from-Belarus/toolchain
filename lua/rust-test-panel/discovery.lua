@@ -53,6 +53,10 @@ end
 function M.collect(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
+  if vim.bo[bufnr].filetype == "python" then
+    return require("rust-test-panel.discovery_python").collect(bufnr)
+  end
+
   local ok, parser = pcall(vim.treesitter.get_parser, bufnr, "rust")
   if not ok or not parser then return {} end
 
