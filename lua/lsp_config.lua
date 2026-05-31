@@ -179,7 +179,7 @@ for _, lsp in ipairs(servers) do
     vim.lsp.enable({ lsp })
   elseif lsp == 'yamlls' then
     vim.lsp.config(lsp, {
-      filetypes = { 'yaml', 'yaml.docker-compose', 'yaml.gitlab', 'json' },
+      filetypes = { 'yaml', 'json' },
       settings = {
         yaml = {
           validate = true,

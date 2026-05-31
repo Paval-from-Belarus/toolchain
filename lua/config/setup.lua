@@ -2,6 +2,14 @@ vim.g.mapleader = ' '
 
 local opts = { noremap = true, silent = true }
 
+-- Custom filetype mappings (ensures *.stpl files are recognized as sailfish
+-- even if the plugin's ftdetect hasn't been loaded yet via rtp)
+vim.filetype.add({
+  extension = {
+    stpl = 'sailfish',
+  },
+})
+
 require('Comment').setup {
   mappings = {
     basic = true,
