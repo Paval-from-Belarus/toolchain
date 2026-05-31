@@ -1,38 +1,33 @@
 local M = {}
 
+-- Generic post-install/update hooks (vim.pack equivalent of vim-plug's `do`).
 vim.api.nvim_create_autocmd('PackChanged', {
   group = vim.api.nvim_create_augroup('UserPackHooks', { clear = true }),
   callback = function(ev)
-    local data = ev.data
-    if not data or not data.spec or not data.kind then return end
+    local spec = ev.data and ev.data.spec
+    local kind = ev.data and ev.data.kind
+    local path = ev.data and ev.data.path
+    if not spec or not kind or (kind ~= 'install' and kind ~= 'update') then return end
 
-    if data.spec.name == 'markdown-preview.nvim' and (data.kind == 'install' or data.kind == 'update') then
-      vim.schedule(function()
-        vim.notify('Building markdown-preview (yarn)...', vim.log.levels.INFO)
-      end)
-      vim.system({ 'sh', '-c', 'cd app && npx --yes yarn install' }, { cwd = data.path }, function(res)
-        vim.schedule(function()
-          if res.code == 0 then
-            vim.notify('markdown-preview build complete', vim.log.levels.INFO)
-          else
-            vim.notify('markdown-preview build failed: ' .. (res.stderr or ''), vim.log.levels.ERROR)
-          end
+    local build = spec.data and spec.data.build
+    if not build then return end
+
+    vim.schedule(function()
+      if type(build) == 'string' then
+        vim.notify('Building ' .. spec.name .. '...', vim.log.levels.INFO)
+        vim.system({ 'sh', '-c', build }, { cwd = path }, function(res)
+          vim.schedule(function()
+            if res.code == 0 then
+              vim.notify(spec.name .. ' build complete', vim.log.levels.INFO)
+            else
+              vim.notify(spec.name .. ' build failed: ' .. (res.stderr or ''), vim.log.levels.ERROR)
+            end
+          end)
         end)
-      end)
-    end
-
-    if data.spec.name == 'nvim-treesitter' and (data.kind == 'install' or data.kind == 'update') then
-      vim.schedule(function()
-        pcall(vim.cmd, 'TSUpdate')
-      end)
-    end
-
-    if data.spec.name == 'sailfish' and (data.kind == 'install' or data.kind == 'update') then
-      local rtp_path = vim.fs.joinpath(data.path, 'syntax', 'vim')
-      if vim.uv.fs_stat(rtp_path) then
-        vim.opt.rtp:append(rtp_path)
+      elseif type(build) == 'function' then
+        build(path)
       end
-    end
+    end)
   end,
 })
 
@@ -46,18 +41,23 @@ local plugins = {
   'https://github.com/rktjmp/lush.nvim',
   'https://github.com/nvim-lualine/lualine.nvim',
   'https://github.com/nvim-tree/nvim-web-devicons',
-  'https://github.com/echasnovski/mini.icons', -- helpful fallback / modern icon provider
 
   -- File explorer
   'https://github.com/nvim-tree/nvim-tree.lua',
 
   -- Treesitter (core + context + rainbow)
-  'https://github.com/nvim-treesitter/nvim-treesitter',
+  {
+    src = 'https://github.com/nvim-treesitter/nvim-treesitter',
+    version = 'main',
+    build = function()
+      vim.schedule(function() pcall(vim.cmd, 'TSUpdate') end)
+    end,
+  },
   'https://github.com/nvim-treesitter/nvim-treesitter-context',
   'https://github.com/HiPhish/rainbow-delimiters.nvim',
 
   -- Telescope + extensions
-  'https://github.com/nvim-telescope/telescope.nvim',
+  { src = 'https://github.com/nvim-telescope/telescope.nvim', version = 'main' },
   'https://github.com/nvim-telescope/telescope-ui-select.nvim',
   'https://github.com/smartpde/telescope-recent-files',
 
@@ -119,11 +119,22 @@ local plugins = {
   'https://github.com/folke/snacks.nvim',
   'https://gitlab.com/itaranto/plantuml.nvim',
   'https://github.com/junegunn/vim-github-dashboard',
-  'https://github.com/iamcco/markdown-preview.nvim',
+  {
+    src = 'https://github.com/iamcco/markdown-preview.nvim',
+    build = 'cd app && npx --yes yarn install',
+  },
   'https://github.com/paval-shlyk/session-todo.nvim',
   'https://github.com/paval-shlyk/dev-tools.nvim',
   'https://github.com/greggh/claude-code.nvim',
-  'https://github.com/rust-sailfish/sailfish',
+  {
+    src = 'https://github.com/rust-sailfish/sailfish',
+    build = function(path)
+      local rtp_path = vim.fs.joinpath(path, 'syntax', 'vim')
+      if vim.uv.fs_stat(rtp_path) then
+        vim.opt.rtp:append(rtp_path)
+      end
+    end,
+  },
   'https://github.com/kenn7/vim-arsync',
   'https://github.com/prabirshrestha/async.vim',
 
@@ -131,12 +142,22 @@ local plugins = {
   'https://github.com/kristijanhusak/vim-dadbod-completion', -- (dedup handled by vim.pack)
 }
 
--- Convert simple strings to full spec tables for clarity and future extensibility.
+-- Normalize plugin list into vim.pack specs.
+-- Supported forms (vim-plug style):
+--   'https://github.com/user/repo'
+--   { src = '...', version = 'main' }
+--   { src = '...', build = 'make' }                    -- string command
+--   { src = '...', build = function(path) ... end }     -- lua function
 local specs = {}
 for _, p in ipairs(plugins) do
   if type(p) == 'string' then
     table.insert(specs, { src = p })
   else
+    if p.build then
+      p.data = p.data or {}
+      p.data.build = p.build
+      p.build = nil
+    end
     table.insert(specs, p)
   end
 end
@@ -156,10 +177,6 @@ pcall(function()
   }
 
   vim.g.have_nerd_font = true
-end)
-
-pcall(function()
-  require('mini.icons').setup()
 end)
 
 M.specs = specs
