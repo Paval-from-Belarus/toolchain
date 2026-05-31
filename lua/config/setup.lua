@@ -1,3 +1,149 @@
+vim.g.mapleader = ' '
+
+local opts = { noremap = true, silent = true }
+
+require('Comment').setup {
+  mappings = {
+    basic = true,
+    extra = true,
+  },
+}
+
+vim.keymap.set('v', '<S-Tab>', '<gv', { noremap = true, silent = true })
+vim.keymap.set('v', '<Tab>', '>gv', { noremap = true, silent = true })
+
+vim.keymap.set('n', 'cvi', ':Inspect<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '=', ':horizontal split<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '+', ':vertical split<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<M-Left>', ':tabprevious<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<M-Right>', ':tabnext<CR>', { noremap = true, silent = true })
+
+vim.keymap.set('n', '<C-F8>', ':DapToggleBreakpoint<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<F7>', ':DapStepInto<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<F8>', ':DapStepOver<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<F9>', ':DapContinue<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-F9>', ':RustRun<CR>', { noremap = true, silent = true })
+
+vim.keymap.set('n', 'псс', 'gcc', { remap = true, silent = true })
+
+local function show_documentation()
+  local filetype = vim.bo.filetype
+  local word = vim.fn.expand('<cword>')
+
+  if filetype == 'vim' or filetype == 'help' then
+    vim.cmd('rightbelow vert h ' .. word)
+  elseif filetype == 'man' or filetype == 'just' then
+    vim.cmd('rightbelow vert Man ' .. word)
+  elseif vim.fn.expand('%:t') == 'Cargo.toml' then
+    local ok, crates = pcall(require, 'crates')
+    if ok and crates.popup_available() then
+      crates.show_popup()
+      return
+    end
+  end
+
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  if #clients > 0 then
+    vim.lsp.buf.hover()
+  else
+    vim.notify("No LSP or documentation available", vim.log.levels.INFO)
+  end
+end
+
+vim.keymap.set('n', '<C-F12>', require('telescope.builtin').lsp_document_symbols, {})
+vim.keymap.set('n', 'cve', require('telescope.builtin').find_files, {})
+vim.keymap.set('n', 'cvf', require('telescope.builtin').live_grep, {})
+vim.keymap.set('n', 'cvq', require('telescope.builtin').quickfix, {})
+vim.keymap.set('n', 'gr', require('telescope.builtin').lsp_references, {})
+
+vim.keymap.set('n', '<leader>ci', require('telescope.builtin').lsp_incoming_calls, {})
+vim.keymap.set('n', '<leader>co', require('telescope.builtin').lsp_outgoing_calls, {})
+
+vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+
+vim.keymap.set('n', 'c]', function() require('treesitter-context').go_to_context(vim.v.count1) end, { silent = true })
+
+vim.keymap.set('n', '<M-0>', function() vim.cmd('DiffviewOpen') end)
+vim.keymap.set('n', '<M-9>', function() vim.cmd('DiffviewFileHistory') end)
+
+vim.keymap.set('n', '<M-5>', function() require('dapui').toggle() end, { silent = true })
+vim.keymap.set('n', '<C-F2>', function() vim.cmd('DapTerminate') end, { silent = true })
+
+vim.keymap.set('n', '<S-F9>', function() vim.cmd('RustLsp debuggables') end, { silent = true })
+
+vim.keymap.set('n', '<C-e>', function() require('telescope').extensions.recent_files.pick() end, { noremap = true, silent = true })
+
+vim.keymap.set('n', 'cvx', ':Telescope session-lens<CR>', {})
+vim.keymap.set('n', 'cvr', function()
+  local find = vim.fn.input('Find: ')
+  if find == '' then return end
+  local replace = vim.fn.input('Replace with: ')
+  if replace == '' then return end
+  local esc_find = vim.fn.escape(find, '/')
+  local esc_replace = vim.fn.escape(replace, '/')
+  require('telescope.builtin').live_grep({
+    default_text = find,
+  })
+end, { desc = 'Search and replace across project' })
+
+vim.keymap.set({ 'n', 'x' }, '<leader>a', function() require('opencode').ask('@this: ', { submit = true }) end, { desc = 'Ask opencode' })
+vim.keymap.set({ 'n', 'x' }, '<leader>s', function() require('opencode').select() end, { desc = 'Execute opencode action' })
+vim.keymap.set('n', '<leader>l', function() return require('opencode').operator('@this ') .. '_' end, { desc = 'Add line to opencode', expr = true })
+vim.keymap.set({ 'n', 't' }, 'cva', function() require('opencode').toggle() end, { desc = 'Toggle opencode' })
+
+vim.keymap.set({ 'n', 't' }, '<M-F12>', function()
+  local current_win = vim.api.nvim_get_current_win()
+  local current_buf = vim.api.nvim_win_get_buf(current_win)
+  local current_buftype = vim.api.nvim_buf_get_option(current_buf, 'buftype')
+  if current_buftype == 'terminal' then
+    vim.cmd('wincmd p')
+  else
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      local buf = vim.api.nvim_win_get_buf(win)
+      if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+        vim.api.nvim_set_current_win(win)
+        vim.cmd('startinsert')
+        return
+      end
+    end
+  end
+end, { noremap = true, silent = true })
+
+vim.keymap.set({ 'n', 't' }, '<F5>', function()
+  vim.fn.system('tmux resize-pane -D 1 && tmux resize-pane -U 1')
+end)
+
+vim.keymap.set('n', '<M-CR>', function() vim.lsp.buf.code_action() end, { silent = true })
+vim.keymap.set('v', '<M-CR>', function() vim.lsp.buf.code_action() end, { silent = true })
+
+vim.keymap.set('n', '<F4>', function()
+  local api = require('nvim-tree.api')
+  if api.tree.is_visible() then api.tree.close() else vim.cmd('DBUI') end
+end, { desc = 'Toggle DBUI / tree' })
+
+vim.keymap.set('n', '<M-1>', function()
+  local api = require('nvim-tree.api')
+  if api.tree.is_visible() then api.tree.close() else api.tree.open() end
+end, { noremap = true, silent = true })
+
+vim.keymap.set('n', '<M-F1>', function()
+  local api = require('nvim-tree.api')
+  if api.tree.is_visible() then api.tree.focus() else api.tree.open(); api.tree.focus() end
+end, { noremap = true, silent = true })
+
+vim.keymap.set('n', '<C-M-p>', [[<cmd>horizontal resize -2<cr>]])
+vim.keymap.set('n', 'cvd', [[<cmd>horizontal resize +2<cr>]])
+vim.keymap.set('n', '<C-M-[>', [[<cmd>vertical resize -5<cr>]])
+vim.keymap.set('n', '<C-M-]>', [[<cmd>vertical resize +5<cr>]])
+
+vim.keymap.set('n', '<C-Tab>', function() vim.cmd('wincmd w') end, { noremap = true, silent = true })
+vim.keymap.set('n', '<Tab>', function() vim.cmd('wincmd w') end, { noremap = true, silent = true })
+
+vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', { expr = true, replace_keycodes = false })
+
+-- === Complex plugin configuration below ===
+
 require('go').setup()
 
 local vim = vim
@@ -12,30 +158,6 @@ require('auto-dark-mode').setup({
 	update_interval = 3000,
 	fallback = "dark"
 })
-
-local function show_documentation()
-	local filetype = vim.bo.filetype
-	local word = vim.fn.expand('<cword>')
-
-	if filetype == 'vim' or filetype == 'help' then
-		vim.cmd('rightbelow vert h ' .. word)
-	elseif filetype == 'man' or filetype == 'just' then
-		vim.cmd('rightbelow vert Man ' .. word)
-	elseif vim.fn.expand('%:t') == 'Cargo.toml' then
-		local ok, crates = pcall(require, 'crates')
-		if ok and crates.popup_available() then
-			crates.show_popup()
-			return
-		end
-	end
-
-	local clients = vim.lsp.get_clients({ bufnr = 0 })
-	if #clients > 0 then
-		vim.lsp.buf.hover()
-	else
-		vim.notify("No LSP or documentation available", vim.log.levels.INFO)
-	end
-end
 
 vim.cmd("colorscheme darcula-solid-idea")
 
@@ -56,7 +178,7 @@ ts_context.setup {
 	on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
 }
 
-require('Comment').setup()
+-- Comment setup moved to plugin/keymap.lua for centralized keymaps
 vim.g.mapleader = ' '
 local rainbow_delimiters = require 'rainbow-delimiters'
 
@@ -323,8 +445,8 @@ vim.keymap.set("n", "<C-M-l>", function() vim.lsp.buf.format() end, { desc = "Fo
 vim.keymap.set("n", "g]", function() vim.lsp.buf.implementation() end, { desc = "Go to implementation of chosen one", })
 vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { desc = "Go to definition", })
 
-vim.keymap.set("n", "<F2>", function() vim.diagnostic.goto_next() end, opts)
-vim.keymap.set("n", "<S-F2>", function() vim.diagnostic.goto_prev() end, opts)
+vim.keymap.set("n", "<F2>", function() vim.diagnostic.jump({ count = 1, float = true }) end, opts)
+vim.keymap.set("n", "<S-F2>", function() vim.diagnostic.jump({ count = -1, float = true }) end, opts)
 
 require("telescope").load_extension("recent_files")
 local crates = require('crates')
@@ -926,3 +1048,19 @@ end, { desc = "Tmux dummy resize" })
 -- -- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o…".
 -- vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
 -- vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
+
+-- Treesitter: install small curated list of parsers on startup
+-- (new nvim-treesitter API - old setup block was removed)
+local ts_parsers = {
+  "bash", "c", "cpp", "go", "javascript", "json", "lua",
+  "markdown", "python", "rust", "sql", "toml", "typescript", "vim", "yaml"
+}
+require('nvim-treesitter').install(ts_parsers)
+
+-- Enable treesitter highlighting for the curated languages
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = ts_parsers,
+  callback = function(ev)
+    vim.treesitter.start(ev.buf)
+  end,
+})

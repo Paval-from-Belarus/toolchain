@@ -1,43 +1,8 @@
 -- Add additional capabilities supported by nvim-cmp
 -- local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-require 'nvim-treesitter'.setup {
-  -- A list of parser names, or "all"
-  -- ensure_installed = { "c", "cpp", "lua", "rust", "java", "toml", "tact" },
-  ensureInstalled = { "c", "cpp", "lua", "rust", "java", "toml", "tact" },
-
-  -- Install parsers synchronously (only applied to `ensure_installed`)
-  sync_install = false,
-
-  -- Automatically install missing parsers when entering buffer
-  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-  auto_install = true,
-  -- ignore_install = { "html", "xml"},
-
-  highlight = {
-    -- `false` will disable the whole extension
-    enable = true,
-    disable = { "" },
-
-    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-    -- Using this option may slow down your editor, and you may see some duplicate highlights.
-    -- Instead of true it can also be a list of languages
-    additional_vim_regex_highlighting = false,
-  },
-
-  ident = {
-    enable = true,
-  },
-
-  -- autotag = {
-  --   enable = true,
-  --   -- enable_rename = true,
-  --   -- enable_close = true,
-  --   -- enable_close_on_slash = true,
-  --   -- filetypes = { "xml", "html" },
-  -- }
-}
+-- Old nvim-treesitter setup removed (new rewrite uses different API).
+-- Parser installation is handled in lua/config/setup.lua with a curated list.
 
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'sh',
