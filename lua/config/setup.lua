@@ -64,8 +64,39 @@ vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
 
 vim.keymap.set('n', 'c]', function() require('treesitter-context').go_to_context(vim.v.count1) end, { silent = true })
 
-vim.keymap.set('n', '<M-0>', function() vim.cmd('DiffviewOpen') end)
-vim.keymap.set('n', '<M-9>', function() vim.cmd('DiffviewFileHistory') end)
+local diffview_state = 0
+local diffview_history_state = 0
+
+local function diffview_toggle()
+  if diffview_history_state == 1 then
+    diffview_history_state = 0
+    pcall(vim.cmd, "DiffviewClose")
+  end
+  if diffview_state == 0 then
+    diffview_state = 1
+    vim.cmd("DiffviewOpen")
+  else
+    diffview_state = 0
+    pcall(vim.cmd, "DiffviewClose")
+  end
+end
+
+local function diffview_history_toggle()
+  if diffview_state == 1 then
+    diffview_state = 0
+    pcall(vim.cmd, "DiffviewClose")
+  end
+  if diffview_history_state == 0 then
+    diffview_history_state = 1
+    vim.cmd("DiffviewFileHistory --follow")
+  else
+    diffview_history_state = 0
+    pcall(vim.cmd, "DiffviewClose")
+  end
+end
+
+vim.keymap.set('n', '<M-0>', diffview_toggle)
+vim.keymap.set('n', '<M-9>', diffview_history_toggle)
 
 vim.keymap.set('n', '<M-5>', function() require('dapui').toggle() end, { silent = true })
 vim.keymap.set('n', '<C-F2>', function() vim.cmd('DapTerminate') end, { silent = true })
@@ -375,32 +406,7 @@ require('mason').setup({
 
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
--- optionally enable 24-bit colour
 vim.opt.termguicolors = true
-local state = 0 --not opened
-local printer = function()
-	if state == 0 then
-		state = 1
-		vim.cmd("DiffviewOpen")
-	else
-		state = 0
-		vim.cmd("DiffviewClose")
-	end
-end
-
-_git_history_state = 0
-local git_history_printer = function()
-	if _git_history_state == 0 then
-		_git_history_state = 1
-		vim.cmd("DiffviewFileHistory")
-	else
-		_git_history_state = 0
-		vim.cmd("DiffviewClose")
-	end
-end
-
-vim.keymap.set('n', '<M-0>', printer)
-vim.keymap.set('n', '<M-9>', git_history_printer)
 local nvim_tree_attach = function(bufnr)
 	local api = require "nvim-tree.api"
 
