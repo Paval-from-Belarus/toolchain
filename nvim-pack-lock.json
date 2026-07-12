@@ -149,10 +149,6 @@
       "rev": "dfbfaa967a6f7ec50789bead7ef87e336c1fa63c",
       "src": "https://github.com/nvim-tree/nvim-web-devicons"
     },
-    "opencode.nvim": {
-      "rev": "1f6442f4b0bb140ac3e87a37c53729a72605a1c3",
-      "src": "https://github.com/NickvanDyke/opencode.nvim"
-    },
     "plantuml.nvim": {
       "rev": "06644d3688bb0ad08a58e91428c0b2d98678e443",
       "src": "https://gitlab.com/itaranto/plantuml.nvim"

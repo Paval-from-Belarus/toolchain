@@ -115,7 +115,7 @@ local plugins = {
   -- Other tools
   'https://github.com/f-person/auto-dark-mode.nvim',
   'https://github.com/aveplen/ruscmd.nvim',
-  'https://github.com/NickvanDyke/opencode.nvim',
+  -- 'https://github.com/NickvanDyke/opencode.nvim',
   'https://github.com/folke/snacks.nvim',
   'https://gitlab.com/itaranto/plantuml.nvim',
   'https://github.com/junegunn/vim-github-dashboard',
