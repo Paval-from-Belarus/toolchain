@@ -12,7 +12,8 @@ M.default_config = {
   -- Terminal window settings (same semantics as claude-code.nvim)
   window = {
     split_ratio = 0.35,
-    position = 'botright',
+    -- 'botright vsplit' opens a vertical split on the right side (good for AI agent side panel)
+    position = 'botright vsplit',
     enter_insert = true,
     start_in_normal_mode = false,
     hide_numbers = true,

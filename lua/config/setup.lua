@@ -126,11 +126,6 @@ vim.keymap.set('n', 'cvr', function()
   })
 end, { desc = 'Search and replace across project' })
 
-vim.keymap.set({ 'n', 'x' }, '<leader>a', function() require('opencode').ask('@this: ', { submit = true }) end, { desc = 'Ask opencode' })
-vim.keymap.set({ 'n', 'x' }, '<leader>s', function() require('opencode').select() end, { desc = 'Execute opencode action' })
-vim.keymap.set('n', '<leader>l', function() return require('opencode').operator('@this ') .. '_' end, { desc = 'Add line to opencode', expr = true })
-vim.keymap.set({ 'n', 't' }, 'cva', function() require('opencode').toggle() end, { desc = 'Toggle opencode' })
-
 vim.keymap.set({ 'n', 't' }, '<M-F12>', function()
   local current_win = vim.api.nvim_get_current_win()
   local current_buf = vim.api.nvim_win_get_buf(current_win)
@@ -901,22 +896,34 @@ require('lualine').setup {
 
 }
 
-vim.g.opencode_opts = {
-	-- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition" on the type or field.
-}
-
 -- Required for `opts.events.reload`.
 vim.o.autoread = true
 
--- Recommended/example keymaps.
-vim.keymap.set({ "n", "x" }, "<leader>a", function() require("opencode").ask("@this: ", { submit = true }) end,
-	{ desc = "Ask opencode…" })
-vim.keymap.set({ "n", "x" }, "<leader>s", function() require("opencode").select() end,
-	{ desc = "Execute opencode action…" })
-vim.keymap.set("n", "<leader>l", function() return require("opencode").operator("@this ") .. "_" end,
-	{ desc = "Add line to opencode", expr = true })
--- vim.keymap.set({"n","t"}, "<M-s>", function() return require("opencode").command("session.list") end, { desc = "Show OpenCode sessions", expr = true })
-vim.keymap.set({ "n", "t" }, "cva", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
+vim.keymap.set({ "n", "t" }, "cva", function() require("grok-code").toggle() end, { desc = "Toggle Grok Build (grok)" })
+
+-- Grok context reference actions (send to the running grok terminal - raw CLI reuse).
+-- These append @file references into the terminal's prompt line.
+-- (opencode mappings using same keys ignored for now per request)
+vim.keymap.set({ 'n' }, '<leader>a', function() require('grok-code').send_file_ref() end, { desc = 'Send @file reference to grok terminal' })
+vim.keymap.set({ 'x' }, '<leader>l', function()
+  -- Capture the *current active* visual selection.
+  -- Use line("v") (the other end / anchor of the visual selection) + line(".") (cursor position).
+  -- This is the reliable way to read the range *while the visual selection is still live*.
+  -- (The '< and '> marks are only guaranteed after leaving visual mode and can lag or collapse.)
+  local start_line = vim.fn.line("v")
+  local end_line = vim.fn.line(".")
+  if start_line > end_line then
+    start_line, end_line = end_line, start_line
+  end
+  require('grok-code').send_range_ref(start_line, end_line)
+end, { desc = 'Send @file:range reference to grok terminal (visual)' })
+vim.keymap.set({ 'n' }, '<leader>l', function()
+  require('grok-code').send_line_ref()
+end, { desc = 'Send @file:line reference to grok terminal' })
+
+-- Ready-to-use actions / predefined prompts (like opencode select)
+-- Picker of common prompts; sends them with file context to the grok terminal.
+vim.keymap.set('n', '<leader>s', function() require('grok-code').select() end, { desc = 'Grok select action (predefined prompts)' })
 
 local last_non_terminal_win = nil
 
@@ -1031,13 +1038,69 @@ require('gitsigns').setup {
 	end
 }
 
-require("session_todo").setup({
-	work_duration = 25 * 60, -- 25 minutes
-	short_break = 5 * 60, -- 5 minutes
-	long_break = 15 * 60, -- 15 minutes
+
+-- Grok Build integration
+-- Same fundamental approach you use with Claude Code:
+--   We simply run the real `grok` CLI inside a Neovim terminal buffer.
+-- The module below adds the same conveniences as claude-code.nvim (quick toggle,
+-- per-project instances, --continue support, file reloads, and a friendly
+-- "not installed yet" prompt with the official docs).
+--
+-- You also get a plain/raw launcher:
+--   :Grok            -> opens a vertical split on the right running grok (raw CLI reuse)
+--   :GrokCode        -> managed toggle (similar to :ClaudeCode)
+require("grok-code").setup({
+  -- Defaults are already tuned for "grok".
+  -- You can override window, keymaps, etc. here.
+  -- Example overriding toggle:
+  -- keymaps = { toggle = { normal = "<C-.>", terminal = "<C-.>" } },
 })
 
-require("claude-code").setup()
+-- Global "coding agent file sync"
+-- When you run CLI agents (claude, grok, etc.) in terminal buffers and they edit files,
+-- we want buffers to pick up changes reliably. This is the same principle whether
+-- you use the dedicated toggles or just manually do `:terminal grok`.
+do
+  vim.o.autoread = true
+
+  vim.api.nvim_create_autocmd({
+    'FocusGained',
+    'BufEnter',
+    'CursorHold',
+    'CursorHoldI',
+    'TermLeave',
+  }, {
+    group = vim.api.nvim_create_augroup('AgentFileSync', { clear = true }),
+    callback = function()
+      if vim.fn.filereadable(vim.fn.expand('%')) == 1 then
+        vim.cmd('silent! checktime')
+      end
+    end,
+    desc = 'Reload buffers changed by external processes (Claude Code, Grok Build, etc.)',
+  })
+
+  -- Occasional poll when terminals exist (helps when agents are busy writing)
+  local agent_timer = vim.loop.new_timer()
+  if agent_timer then
+    agent_timer:start(1500, 1500, vim.schedule_wrap(function()
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+          vim.cmd('silent! checktime')
+          return
+        end
+      end
+    end))
+  end
+
+  vim.api.nvim_create_autocmd('FileChangedShellPost', {
+    group = vim.api.nvim_create_augroup('AgentFileSyncNotify', { clear = true }),
+    callback = function()
+      vim.notify('Buffer reloaded (changed by agent in terminal)', vim.log.levels.INFO)
+    end,
+  })
+end
+
 -- require("dev-tools").setup({
 --   bdd = {
 --     enabled = true,

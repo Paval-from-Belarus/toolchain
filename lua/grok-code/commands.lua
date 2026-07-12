@@ -70,10 +70,12 @@ function M.register_commands(grok_code)
       launch_cmd = 'cd ' .. vim.fn.shellescape(git_root) .. ' && ' .. full
     end
 
-    -- Open in a bottom split, similar to common manual usage
+    -- Open as vertical split on the right side (side-panel style for agent)
     -- This is pure "open terminal view + run the real grok CLI"
-    vim.cmd('botright split')
-    vim.cmd('resize 18')
+    vim.cmd('botright vsplit')
+    local ratio = (cfg.window and cfg.window.split_ratio) or 0.35
+    local width = math.floor(vim.o.columns * ratio)
+    vim.cmd('vertical resize ' .. width)
     vim.cmd('terminal ' .. launch_cmd)
     vim.cmd('setlocal bufhidden=hide')
     vim.cmd('file grok-' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t'))

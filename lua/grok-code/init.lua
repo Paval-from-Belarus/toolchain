@@ -189,6 +189,9 @@ function M.send_file_ref()
 end
 
 --- Send a range reference like @path/to/file:10-25
+--- Preferred: callers (the visual keymap) pass explicit start/end captured with
+--- vim.fn.line("v") and vim.fn.line(".") while the selection is live.
+--- When called without args it tries to detect a live visual selection first.
 function M.send_range_ref(start_line, end_line)
   local path = get_relative_file()
   if not path then
@@ -197,15 +200,23 @@ function M.send_range_ref(start_line, end_line)
   end
 
   if not start_line or not end_line then
+    -- When called without args (e.g. from :GrokSendRangeRef or other),
+    -- try to capture the current visual selection if we're in one.
     local mode = vim.fn.mode()
     if mode:match('^[vV\x16]') then
-      -- Called while still in visual mode
+      -- Live visual selection: 'v' is the other end, '.' is cursor.
       start_line = vim.fn.line('v')
       end_line = vim.fn.line('.')
     else
-      -- Use marks (set when leaving visual or by operator)
+      -- Not in visual: fall back to last visual selection marks.
+      -- These may be from a previous selection.
       start_line = vim.fn.line("'<")
       end_line = vim.fn.line("'>")
+
+      if (not start_line or start_line == 0) and (not end_line or end_line == 0) then
+        start_line = vim.fn.line('.')
+        end_line = start_line
+      end
     end
   end
 
@@ -213,7 +224,11 @@ function M.send_range_ref(start_line, end_line)
     start_line = vim.fn.line('.')
     end_line = start_line
   end
-  if not end_line or end_line < start_line then end_line = start_line end
+
+  -- Ensure start <= end
+  if end_line < start_line then
+    start_line, end_line = end_line, start_line
+  end
 
   local ref = string.format('@%s:%d-%d', path, start_line, end_line)
   M.send(ref, { focus = true })
