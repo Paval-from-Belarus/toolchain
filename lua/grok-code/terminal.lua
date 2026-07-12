@@ -201,10 +201,11 @@ local function get_instance_id(config, git)
   return 'global'
 end
 
-local function create_new_instance(grok_code, config, git, instance_id)
-  local cmd_base = config.command
-  local function has_grok()
-    if vim.fn.executable(cmd_base) == 1 then return true end
+local function create_new_instance(grok_code, config, git, instance_id, extra_args)
+  -- Always resolve/check the bare binary; extra_args (e.g. --continue) are appended later.
+  local base_cmd = config.command
+  local function ensure_grok_available()
+    if vim.fn.executable(base_cmd) == 1 then return true end
     -- Common install locations for Grok Build
     local candidates = {
       vim.fn.expand('~/.grok/bin/grok'),
@@ -222,10 +223,18 @@ local function create_new_instance(grok_code, config, git, instance_id)
     return false
   end
 
-  if not has_grok() then
+  if not ensure_grok_available() then
     show_install_prompt(config)
     return
   end
+
+  local binary = config._resolved_command or base_cmd
+  local to_run = binary
+  if extra_args and extra_args ~= '' then
+    to_run = binary .. ' ' .. extra_args
+  end
+
+  local full_cmd = build_command_with_git_root(config, git, to_run)
 
   if config.window.position == 'float' then
     local buf = vim.api.nvim_create_buf(false, true)
@@ -233,8 +242,6 @@ local function create_new_instance(grok_code, config, git, instance_id)
     local win = create_float(config, buf)
     vim.api.nvim_win_set_buf(win, buf)
 
-    local to_run = config._resolved_command or cmd_base
-    local full_cmd = build_command_with_git_root(config, git, to_run)
     vim.fn.termopen(full_cmd)
 
     vim.api.nvim_buf_set_name(buf, generate_buffer_name(instance_id, config))
@@ -246,8 +253,6 @@ local function create_new_instance(grok_code, config, git, instance_id)
     end
   else
     create_split(config.window.position, config)
-    local to_run = config._resolved_command or cmd_base
-    local full_cmd = build_command_with_git_root(config, git, to_run)
     vim.cmd('terminal ' .. full_cmd)
     vim.cmd('setlocal bufhidden=hide')
     vim.cmd('file ' .. generate_buffer_name(instance_id, config))
@@ -263,7 +268,7 @@ local function create_new_instance(grok_code, config, git, instance_id)
   end
 end
 
-function M.toggle(grok_code, config, git)
+function M.toggle(grok_code, config, git, extra_args)
   local id = get_instance_id(config, git)
   grok_code.grok_code.current_instance = id
 
@@ -279,7 +284,7 @@ function M.toggle(grok_code, config, git)
   if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
     handle_existing_instance(bufnr, config)
   else
-    create_new_instance(grok_code, config, git, id)
+    create_new_instance(grok_code, config, git, id, extra_args)
   end
 end
 

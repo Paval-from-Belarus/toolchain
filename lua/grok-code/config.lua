@@ -63,7 +63,6 @@ M.default_config = {
         resume = '<leader>gR',
       },
     },
-    window_navigation = true,
     scrolling = true,
 
     -- Context sending actions (for sending file/range references to the grok terminal)

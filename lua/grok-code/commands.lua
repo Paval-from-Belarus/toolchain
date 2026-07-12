@@ -42,11 +42,20 @@ function M.register_commands(grok_code)
 
     -- Check for the binary (with friendly install prompt)
     if vim.fn.executable(cmd_base) == 0 then
-      -- Try common locations
-      local candidates = { vim.fn.expand('~/.grok/bin/grok'), vim.fn.expand('~/.local/bin/grok') }
+      -- Try common locations (keep in sync with terminal.lua)
+      local candidates = {
+        vim.fn.expand('~/.grok/bin/grok'),
+        vim.fn.expand('~/.local/bin/grok'),
+        '/usr/local/bin/grok',
+      }
       local found = false
       for _, p in ipairs(candidates) do
-        if vim.fn.executable(p) == 1 then cmd_base = p; found = true; break end
+        if vim.fn.executable(p) == 1 or (vim.fn.filereadable(p) == 1 and vim.fn.getfperm(p):match('x')) then
+          cmd_base = p
+          cfg._resolved_command = p
+          found = true
+          break
+        end
       end
       if not found then
         local term = require('grok-code.terminal')

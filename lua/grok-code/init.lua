@@ -37,8 +37,8 @@ function M.force_insert_mode()
   terminal.force_insert_mode(M, M.config)
 end
 
-function M.toggle()
-  terminal.toggle(M, M.config, git)
+function M.toggle(extra_args)
+  terminal.toggle(M, M.config, git, extra_args)
 
   local cur = M.grok_code.current_instance
   local bufnr = cur and M.grok_code.instances and M.grok_code.instances[cur]
@@ -52,18 +52,14 @@ function M.toggle_with_variant(variant_name)
     return M.toggle()
   end
 
-  local original = M.config.command
-  M.config.command = original .. ' ' .. M.config.command_variants[variant_name]
-
-  terminal.toggle(M, M.config, git)
+  local extra = M.config.command_variants[variant_name]
+  terminal.toggle(M, M.config, git, extra)
 
   local cur = M.grok_code.current_instance
   local bufnr = cur and M.grok_code.instances and M.grok_code.instances[cur]
   if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
     keymaps.setup_terminal_navigation(M, M.config)
   end
-
-  M.config.command = original
 end
 
 function M.setup(user_config)

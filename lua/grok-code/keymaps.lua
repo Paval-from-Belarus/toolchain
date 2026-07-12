@@ -29,15 +29,6 @@ function M.register_keymaps(grok_code, config)
     end
   end
 
-  if km.window_navigation then
-    -- Only set when inside a grok terminal buffer? For simplicity we set global like the original often does.
-    -- Users can disable if conflicting.
-    vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]], { noremap = true, silent = true, desc = 'Window left' })
-    vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]], { noremap = true, silent = true, desc = 'Window down' })
-    vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]], { noremap = true, silent = true, desc = 'Window up' })
-    vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]], { noremap = true, silent = true, desc = 'Window right' })
-  end
-
   if km.scrolling then
     vim.keymap.set('t', '<C-f>', [[<C-\><C-n><C-f>i]], { noremap = true, silent = true, desc = 'Page down (re-enter insert with i)' })
     vim.keymap.set('t', '<C-b>', [[<C-\><C-n><C-b>i]], { noremap = true, silent = true, desc = 'Page up (re-enter insert with i)' })
