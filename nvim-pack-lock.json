@@ -76,6 +76,10 @@
       "rev": "5c741a26f5df77c95d42d8f48e7008aea10e5f4f",
       "src": "https://github.com/ray-x/go.nvim"
     },
+    "grok-code.nvim": {
+      "rev": "2d7646e6568fce54776a708c0bd1963995018d5d",
+      "src": "https://github.com/paval-shlyk/grok-code.nvim"
+    },
     "guihua.lua": {
       "rev": "f8e06bd8a26dee3377d63c2adf1e57cdb58ac474",
       "src": "https://github.com/ray-x/guihua.lua"

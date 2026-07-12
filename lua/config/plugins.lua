@@ -125,6 +125,7 @@ local plugins = {
   },
   'https://github.com/paval-shlyk/session-todo.nvim',
   'https://github.com/paval-shlyk/dev-tools.nvim',
+  'https://github.com/paval-shlyk/grok-code.nvim',
   'https://github.com/greggh/claude-code.nvim',
   {
     src = 'https://github.com/rust-sailfish/sailfish',
@@ -165,6 +166,29 @@ end
 -- Perform the actual plugin installation / registration.
 -- This replaces the entire old vim-plug block.
 vim.pack.add(specs)
+
+-- Convenience command for updating plugins (including grok-code.nvim)
+vim.api.nvim_create_user_command('PackUpdate', function(opts)
+  local plugins = opts.fargs
+  if #plugins == 0 then
+    vim.pack.update(nil, { force = true })
+  else
+    vim.pack.update(plugins, { force = true })
+  end
+end, {
+  nargs = '*',
+  desc = 'Update one or more plugins (or all if no arguments) using vim.pack',
+  complete = function()
+    -- Basic completion from lock file names
+    local lock = vim.fn.readfile(vim.fn.stdpath('config') .. '/nvim-pack-lock.json')
+    local names = {}
+    for _, line in ipairs(lock) do
+      local name = line:match('"([^"]+)":')
+      if name then table.insert(names, name) end
+    end
+    return names
+  end,
+})
 
 pcall(function()
   local devicons = require('nvim-web-devicons')
