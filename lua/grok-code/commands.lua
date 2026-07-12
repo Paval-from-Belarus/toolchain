@@ -84,7 +84,7 @@ function M.register_commands(grok_code)
 
   -- New actions for sending context references to the grok terminal (raw CLI reuse)
   cmd('GrokSendFileRef', function() grok_code.send_file_ref() end, { desc = 'Append @current-file reference to grok terminal' })
-  cmd('GrokSendRangeRef', function() grok_code.send_range_ref() end, { desc = 'Append @file:line-line reference to grok terminal' })
+  cmd('GrokSendRangeRef', function() grok_code.send_range_ref() end, { desc = 'Append @file:line or @file:line-line reference to grok terminal' })
   cmd('GrokSendLineRef', function() grok_code.send_line_ref() end, { desc = 'Append @file:line reference to grok terminal' })
   cmd('GrokSelect', function() grok_code.select() end, { desc = 'Pick a ready-to-use action/prompt and send it to grok terminal (with file context)' })
   cmd('GrokSendPrompt', function(opts)

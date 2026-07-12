@@ -61,7 +61,7 @@ function M.register_keymaps(grok_code, config)
         start_line, end_line = end_line, start_line
       end
       grok_code.send_range_ref(start_line, end_line)
-    end, { desc = 'Send @file:range reference to grok terminal (visual)', noremap = true, silent = true })
+    end, { desc = 'Send @file:range (or single line) reference to grok terminal (visual)', noremap = true, silent = true })
   end
 
   if km.send_line_ref and km.send_line_ref ~= false then

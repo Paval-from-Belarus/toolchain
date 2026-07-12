@@ -188,10 +188,11 @@ function M.send_file_ref()
   M.send('@' .. path, { focus = true })
 end
 
---- Send a range reference like @path/to/file:10-25
+--- Send a range reference like @path/to/file:10-25 or @path/to/file:42 (single line collapsed)
 --- Preferred: callers (the visual keymap) pass explicit start/end captured with
 --- vim.fn.line("v") and vim.fn.line(".") while the selection is live.
 --- When called without args it tries to detect a live visual selection first.
+--- If start == end, the reference is collapsed to a single line (no "-N" suffix).
 function M.send_range_ref(start_line, end_line)
   local path = get_relative_file()
   if not path then
@@ -230,7 +231,13 @@ function M.send_range_ref(start_line, end_line)
     start_line, end_line = end_line, start_line
   end
 
-  local ref = string.format('@%s:%d-%d', path, start_line, end_line)
+  -- Collapse to single-line format when range is only one line
+  local ref
+  if start_line == end_line then
+    ref = string.format('@%s:%d', path, start_line)
+  else
+    ref = string.format('@%s:%d-%d', path, start_line, end_line)
+  end
   M.send(ref, { focus = true })
 end
 

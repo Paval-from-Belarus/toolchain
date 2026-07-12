@@ -69,7 +69,7 @@ M.default_config = {
     -- Context sending actions (for sending file/range references to the grok terminal)
     -- Set to false to disable a particular binding.
     send_file_ref = '<leader>a',   -- normal mode: send @file
-    send_range_ref = '<leader>l',  -- visual mode: send @file:start-end
+    send_range_ref = '<leader>l',  -- visual mode: send @file:start-end (collapsed to @file:N if single line)
     send_line_ref = '<leader>l',   -- normal mode: send @file:line
     select = '<leader>s',          -- picker of ready-to-use prompts/actions
   },
