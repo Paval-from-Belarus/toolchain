@@ -29,11 +29,6 @@ function M.register_keymaps(grok_code, config)
     end
   end
 
-  if km.scrolling then
-    vim.keymap.set('t', '<C-f>', [[<C-\><C-n><C-f>i]], { noremap = true, silent = true, desc = 'Page down (re-enter insert with i)' })
-    vim.keymap.set('t', '<C-b>', [[<C-\><C-n><C-b>i]], { noremap = true, silent = true, desc = 'Page up (re-enter insert with i)' })
-  end
-
   -- Context reference actions (file / range / line / select)
   -- These are the "send to grok terminal" helpers.
 
