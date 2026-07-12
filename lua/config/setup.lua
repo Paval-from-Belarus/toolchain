@@ -174,8 +174,6 @@ vim.keymap.set('n', '<C-M-]>', [[<cmd>vertical resize +5<cr>]])
 vim.keymap.set('n', '<C-Tab>', function() vim.cmd('wincmd w') end, { noremap = true, silent = true })
 vim.keymap.set('n', '<Tab>', function() vim.cmd('wincmd w') end, { noremap = true, silent = true })
 
-vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', { expr = true, replace_keycodes = false })
-
 -- === Complex plugin configuration below ===
 
 require('go').setup()
@@ -635,10 +633,6 @@ require('crates').setup {
 }
 
 
-vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
-	expr = true,
-	replace_keycodes = false
-})
 
 vim.g.copilot_no_tab_map = true
 vim.g.copilot_filetypes = {
@@ -646,7 +640,10 @@ vim.g.copilot_filetypes = {
 	-- ["markdown"] = false,
 }
 
-vim.o.sessionoptions = "blank,buffers,curdir,help,tabpages,winsize,winpos,localoptions,terminal"
+-- We deliberately exclude "terminal" (terminals can't be properly restored;
+-- their jobs are dead after restart, and including it used to cause
+-- "unknown buf_type=terminal" errors from auto-session).
+vim.o.sessionoptions = "blank,buffers,curdir,help,tabpages,winsize,winpos,localoptions"
 vim.g.db_ui_execute_on_save = 0
 vim.g.db_ui_show_database_icon = 1
 vim.g.db_ui_use_nerd_fonts = 1
@@ -723,10 +720,54 @@ vim.keymap.set("n", "<F4>", toggle_db_view, { desc = "Open DBUI" })
 vim.keymap.set('n', '<M-1>', toggle_left_menu, { noremap = true, silent = true })
 vim.keymap.set('n', '<M-F1>', focus_left_menu, { noremap = true, silent = true })
 
-local function on_session_save()
-	require('nvim-tree.api').tree.close()
+local function grok_session_marker()
+	local dir = vim.fn.stdpath("data") .. "/grok"
+	vim.fn.mkdir(dir, "p")
+	local cwd = vim.fn.getcwd()
+	local safe = cwd:gsub("[^%w%-_%.]", "_")
+	return dir .. "/had_grok_" .. safe
+end
 
+local function on_session_save()
+	-- Detect whether a grok terminal is currently open.
+	local had_grok = false
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		local buf = vim.api.nvim_win_get_buf(win)
+		local ok, buftype = pcall(vim.api.nvim_buf_get_option, buf, 'buftype')
+		if ok and buftype == 'terminal' then
+			local name = vim.api.nvim_buf_get_name(buf):lower()
+			if name:match('grok') then
+				had_grok = true
+				break
+			end
+		end
+	end
+
+	-- Persist decision using a small sidecar marker file (very reliable).
+	-- This works independently of globals or sessionoptions.
+	local marker = grok_session_marker()
+	if had_grok then
+		vim.fn.writefile({ "1" }, marker)
+	else
+		pcall(vim.fn.delete, marker)
+	end
+
+	require('nvim-tree.api').tree.close()
 	is_left_menu_open = false
+
+	-- Close any grok terminals before saving the session.
+	-- We don't persist terminal buffers.
+	-- On restore we will re-open only if the marker exists for this cwd.
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		local buf = vim.api.nvim_win_get_buf(win)
+		local ok, buftype = pcall(vim.api.nvim_buf_get_option, buf, 'buftype')
+		if ok and buftype == 'terminal' then
+			local name = vim.api.nvim_buf_get_name(buf):lower()
+			if name:match('grok') then
+				pcall(vim.api.nvim_win_close, win, true)
+			end
+		end
+	end
 end
 
 local function on_session_restore()
@@ -737,6 +778,30 @@ local function on_session_restore()
 	api.tree.find_file({ open = true, focus = true })
 
 	is_left_menu_open = true
+
+	-- Restore Grok terminal *only* if we had one when this session was saved.
+	-- We use a per-cwd marker file (see on_session_save) instead of globals.
+	vim.defer_fn(function()
+		local marker = grok_session_marker()
+		if vim.fn.filereadable(marker) == 1 then
+			local current_win = vim.api.nvim_get_current_win()
+
+			local ok, grok = pcall(require, "grok-code")
+			if ok and type(grok.toggle_with_variant) == "function" then
+				grok.toggle_with_variant("continue")
+			else
+				vim.cmd("Grok --continue")
+			end
+
+			-- Restore focus to the previous (code) window.
+			-- The toggle always focuses the terminal + starts insert.
+			vim.defer_fn(function()
+				if vim.api.nvim_win_is_valid(current_win) then
+					pcall(vim.api.nvim_set_current_win, current_win)
+				end
+			end, 80)
+		end
+	end, 200)
 end
 
 require('auto-session').setup({
