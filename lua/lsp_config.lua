@@ -253,7 +253,7 @@ local opts         = {
           buildScripts = {
             enable = true,
           },
-          target = 'aarch64-linux-android'
+          -- target = 'aarch64-linux-android'
           -- targetOs = "android"
           -- target = "x86_64-pc-windows-msvc",
         },
