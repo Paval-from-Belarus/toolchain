@@ -901,30 +901,6 @@ vim.o.autoread = true
 
 vim.keymap.set({ "n", "t" }, "cva", function() require("grok-code").toggle() end, { desc = "Toggle Grok Build (grok)" })
 
--- Grok context reference actions (send to the running grok terminal - raw CLI reuse).
--- These append @file references into the terminal's prompt line.
--- (opencode mappings using same keys ignored for now per request)
-vim.keymap.set({ 'n' }, '<leader>a', function() require('grok-code').send_file_ref() end, { desc = 'Send @file reference to grok terminal' })
-vim.keymap.set({ 'x' }, '<leader>l', function()
-  -- Capture the *current active* visual selection.
-  -- Use line("v") (the other end / anchor of the visual selection) + line(".") (cursor position).
-  -- This is the reliable way to read the range *while the visual selection is still live*.
-  -- (The '< and '> marks are only guaranteed after leaving visual mode and can lag or collapse.)
-  local start_line = vim.fn.line("v")
-  local end_line = vim.fn.line(".")
-  if start_line > end_line then
-    start_line, end_line = end_line, start_line
-  end
-  require('grok-code').send_range_ref(start_line, end_line)
-end, { desc = 'Send @file:range reference to grok terminal (visual)' })
-vim.keymap.set({ 'n' }, '<leader>l', function()
-  require('grok-code').send_line_ref()
-end, { desc = 'Send @file:line reference to grok terminal' })
-
--- Ready-to-use actions / predefined prompts (like opencode select)
--- Picker of common prompts; sends them with file context to the grok terminal.
-vim.keymap.set('n', '<leader>s', function() require('grok-code').select() end, { desc = 'Grok select action (predefined prompts)' })
-
 local last_non_terminal_win = nil
 
 vim.keymap.set({ "n", "t" }, "<M-F12>", function()
@@ -1051,9 +1027,14 @@ require('gitsigns').setup {
 --   :GrokCode        -> managed toggle (similar to :ClaudeCode)
 require("grok-code").setup({
   -- Defaults are already tuned for "grok".
-  -- You can override window, keymaps, etc. here.
-  -- Example overriding toggle:
-  -- keymaps = { toggle = { normal = "<C-.>", terminal = "<C-.>" } },
+  -- Keymaps (toggle + send actions) are managed by the plugin.
+  -- Assign keys here instead of writing full handler functions.
+  -- keymaps = {
+  --   send_file_ref  = '<leader>a',
+  --   send_range_ref = '<leader>l',   -- visual mode
+  --   send_line_ref  = '<leader>l',   -- normal mode
+  --   select         = '<leader>s',
+  -- },
 })
 
 -- Global "coding agent file sync"

@@ -42,6 +42,39 @@ function M.register_keymaps(grok_code, config)
     vim.keymap.set('t', '<C-f>', [[<C-\><C-n><C-f>i]], { noremap = true, silent = true, desc = 'Page down (re-enter insert with i)' })
     vim.keymap.set('t', '<C-b>', [[<C-\><C-n><C-b>i]], { noremap = true, silent = true, desc = 'Page up (re-enter insert with i)' })
   end
+
+  -- Context reference actions (file / range / line / select)
+  -- These are the "send to grok terminal" helpers.
+
+  if km.send_file_ref and km.send_file_ref ~= false then
+    vim.keymap.set('n', km.send_file_ref, function()
+      grok_code.send_file_ref()
+    end, { desc = 'Send @file reference to grok terminal', noremap = true, silent = true })
+  end
+
+  if km.send_range_ref and km.send_range_ref ~= false then
+    -- Visual mode: capture live selection using 'v' mark + current line
+    vim.keymap.set('x', km.send_range_ref, function()
+      local start_line = vim.fn.line('v')
+      local end_line = vim.fn.line('.')
+      if start_line > end_line then
+        start_line, end_line = end_line, start_line
+      end
+      grok_code.send_range_ref(start_line, end_line)
+    end, { desc = 'Send @file:range reference to grok terminal (visual)', noremap = true, silent = true })
+  end
+
+  if km.send_line_ref and km.send_line_ref ~= false then
+    vim.keymap.set('n', km.send_line_ref, function()
+      grok_code.send_line_ref()
+    end, { desc = 'Send @file:line reference to grok terminal', noremap = true, silent = true })
+  end
+
+  if km.select and km.select ~= false then
+    vim.keymap.set('n', km.select, function()
+      grok_code.select()
+    end, { desc = 'Grok select action (predefined prompts)', noremap = true, silent = true })
+  end
 end
 
 function M.setup_terminal_navigation(grok_code, config)
