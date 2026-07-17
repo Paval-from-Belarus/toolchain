@@ -3,7 +3,7 @@
 
 require 'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all"
-  ensure_installed = { "c", "cpp", "lua", "rust", "java", "toml", "tact", "xml" },
+  ensure_installed = { "c", "cpp", "lua", "rust", "java", "toml", "xml", "helm" },
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
@@ -51,15 +51,23 @@ vim.api.nvim_create_autocmd('FileType', {
 require('mason').setup()
 require('mason-lspconfig').setup {
   automatic_enable = false,
-  ensure_installed = { 'lua_ls', 'taplo', 'yamlls', 'html', 'pyright', 'ts_ls', 'codebook', 'just', 'asm_lsp', 'buf_ls', 'harper_ls'}
+  ensure_installed = { 'lua_ls', 'taplo', 'yamlls', 'html', 'pyright', 'ts_ls', 'codebook', 'just', 'asm_lsp', 'buf_ls', 'harper_ls', 'helm_ls'}
 }
+
+vim.filetype.add({
+  pattern = {
+    ['.*/templates/.*%.ya?ml'] = 'helm',
+    ['.*/templates/.*%.tpl'] = 'helm',
+    ['.*/templates/NOTES%.txt'] = 'helm',
+  },
+})
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
 local servers = { 'clangd', 'pyright', 'ts_ls', 'lua_ls',
   'yamlls', 'digestif', 'taplo', 'buf_ls', 'sqlls',
   'html', 'codebook-lsp', 'just',
   'asm_lsp', 'systemd_lsp', 'jdtls', 'terraformls', 'gopls', 'csharp_ls',
-  'harper_ls'
+  'harper_ls', 'helm_ls'
 }
 
 local is_first_delete = true
@@ -165,12 +173,23 @@ for _, lsp in ipairs(servers) do
       }
     })
     vim.lsp.enable({ lsp })
+  elseif lsp == 'helm_ls' then
+    vim.lsp.config(lsp, {
+      cmd = { 'helm_ls', 'serve' },
+      filetypes = { 'helm' },
+      on_attach = on_attach,
+    })
+    vim.lsp.enable({ lsp })
   elseif lsp == 'yamlls' then
     vim.lsp.config(lsp, {
       filetypes = { 'yaml', 'yaml.docker-compose', 'yaml.gitlab', 'json' },
       settings = {
         yaml = {
           validate = true,
+          format = {
+            enable = true,
+            insertFinalNewline = true,
+          },
           schemas = {
             kubernetes = "*.yaml",
             ["http://json.schemastore.org/github-workflow.json"] = ".github/workflows/*",
@@ -193,7 +212,15 @@ for _, lsp in ipairs(servers) do
           }
         }
       },
-      on_attach = on_attach,
+      on_attach = function(client, buffer)
+        if vim.api.nvim_buf_get_name(buffer):match('/templates/') then
+          vim.schedule(function()
+            vim.lsp.buf_detach_client(buffer, client.id)
+          end)
+          return
+        end
+        on_attach(client, buffer)
+      end,
       -- capabilities = capabilities,
     })
     vim.lsp.enable({ lsp })
