@@ -54,7 +54,8 @@ local function render()
       " " .. string.rep("-", WIDTH - 1),
       "",
       "  <CR>       jump to test",
-      "  <Space>    mark / unmark",
+      "  <Space>    mark / unmark (anonymous)",
+      "  m          bookmark with a name",
       "  r          run marked (or focused)",
       "  R          run all tests",
       "  n          rename via LSP",
@@ -78,8 +79,10 @@ local function render()
 
   for i, e in ipairs(state.entries) do
     -- marker(2) + lnum(4) + gap(2) + display → fixed offsets for highlighting
-    local mark = state.marked[i] and "* " or "  "
-    lines[HEADER + i] = mark .. string.format("%4d", e.lnum) .. "  " .. e.display
+    local mv     = state.marked[i]
+    local prefix = mv and "* " or "  "
+    local suffix = (type(mv) == "string") and ("  @" .. mv) or ""
+    lines[HEADER + i] = prefix .. string.format("%4d", e.lnum) .. "  " .. e.display .. suffix
   end
 
   if #state.entries == 0 then
@@ -95,7 +98,8 @@ local function render()
 
   for i, e in ipairs(state.entries) do
     local row = HEADER + i - 1  -- 0-indexed
-    if state.marked[i] then
+    local mv  = state.marked[i]
+    if mv then
       vim.api.nvim_buf_add_highlight(state.buf, state.ns, "DiagnosticOk", row, 0, 2)
     end
     -- line-number column (bytes 2–6)
@@ -110,6 +114,10 @@ local function render()
         vim.api.nvim_buf_add_highlight(state.buf, state.ns, "Comment", row, off+ks-1, off+ke)
         s = ke + 1
       end
+    end
+    -- bookmark name suffix  "  @name"  (byte offset: 8 + #display + 2)
+    if type(mv) == "string" then
+      vim.api.nvim_buf_add_highlight(state.buf, state.ns, "Special", row, off + #e.display + 2, -1)
     end
   end
 end
@@ -161,6 +169,25 @@ local function toggle_mark()
   if state.marked[i] then state.marked[i] = nil else state.marked[i] = true end
   render()
   pcall(vim.api.nvim_win_set_cursor, state.win, { row, 0 })
+end
+
+local function named_mark()
+  local row = vim.api.nvim_win_get_cursor(state.win)[1]
+  local i   = row - HEADER
+  if i < 1 or i > #state.entries then return end
+  local current = state.marked[i]
+  local default = (type(current) == "string") and current or ""
+  vim.ui.input({ prompt = "Bookmark name (empty to clear): ", default = default }, function(input)
+    if input == nil then return end  -- cancelled
+    local name = vim.trim(input)
+    state.marked[i] = (name ~= "") and name or nil
+    vim.schedule(function()
+      render()
+      if state.win and vim.api.nvim_win_is_valid(state.win) then
+        pcall(vim.api.nvim_win_set_cursor, state.win, { row, 0 })
+      end
+    end)
+  end)
 end
 
 local function jump_to_test()
@@ -312,6 +339,7 @@ local function setup_keymaps()
   end
   map("<CR>",    jump_to_test)
   map("<Space>", toggle_mark)
+  map("m",       named_mark)
   map("r",       run_tests)
   map("R",       run_all)
   map("n",       rename_test)
@@ -370,13 +398,31 @@ function M.toggle(source_bufnr)
 
   state.augroup = vim.api.nvim_create_augroup("RustTestPanel" .. buf, { clear = true })
 
-  -- Auto-refresh when the source file is saved
+  -- Refresh when the current source file is saved
   vim.api.nvim_create_autocmd("BufWritePost", {
     group    = state.augroup,
-    buffer   = source_bufnr,
     callback = function()
-      if not M.is_open() then return true end  -- remove itself
+      if not M.is_open() then return end
+      if vim.api.nvim_get_current_buf() ~= state.source then return end
       state.entries = require("rust-test-panel.discovery").collect(state.source)
+      render()
+    end,
+  })
+
+  -- Switch source when the user enters a different Rust/Python buffer
+  vim.api.nvim_create_autocmd("BufEnter", {
+    group    = state.augroup,
+    callback = function()
+      if not M.is_open() then return end
+      local bufnr = vim.api.nvim_get_current_buf()
+      if bufnr == state.buf or bufnr == state.source then return end
+      local ft = vim.bo[bufnr].filetype
+      if ft ~= "rust" and ft ~= "python" then return end
+      state.source   = bufnr
+      state.filetype = ft
+      state.marked   = {}
+      state.prev_win = vim.api.nvim_get_current_win()
+      state.entries  = require("rust-test-panel.discovery").collect(bufnr)
       render()
     end,
   })

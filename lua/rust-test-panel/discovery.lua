@@ -2,6 +2,7 @@ local M = {}
 
 local function is_test_attr(text)
   if text:match("^#%[test[%]%(]") then return true end
+  if text:match("^#%[actix_test]") then return true end
   if text:match("::%s*test[%]%(]") then return true end
   if text:match("^#%[rstest[%]%(]") then return true end
   return false
