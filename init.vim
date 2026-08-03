@@ -133,3 +133,5 @@ set termguicolors
 highlight rustLifetime guifg=#20999d
 
 autocmd FileType sql,mysql,plsql lua require('cmp').setup.buffer({ sources = {{ name = 'vim-dadbod-completion' }} })
+
+lua require('sharelink').setup()
