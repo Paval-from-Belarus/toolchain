@@ -121,6 +121,8 @@ Plug 'nvim-treesitter/nvim-treesitter-context'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'folke/snacks.nvim'
 
+Plug 'tigion/nvim-asciidoc-preview'
+
 " Plug 'paval-shlyk/session-todo.nvim'
 
 " they both use same bindings
