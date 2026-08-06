@@ -5,16 +5,16 @@ local opts = { noremap = true, silent = true }
 -- Custom filetype mappings (ensures *.stpl files are recognized as sailfish
 -- even if the plugin's ftdetect hasn't been loaded yet via rtp)
 vim.filetype.add({
-  extension = {
-    stpl = 'sailfish',
-  },
+	extension = {
+		stpl = 'sailfish',
+	},
 })
 
 require('Comment').setup {
-  mappings = {
-    basic = true,
-    extra = true,
-  },
+	mappings = {
+		basic = true,
+		extra = true,
+	},
 }
 
 vim.keymap.set('v', '<S-Tab>', '<gv', { noremap = true, silent = true })
@@ -35,27 +35,27 @@ vim.keymap.set('n', '<C-F9>', ':RustRun<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', 'псс', 'gcc', { remap = true, silent = true })
 
 local function show_documentation()
-  local filetype = vim.bo.filetype
-  local word = vim.fn.expand('<cword>')
+	local filetype = vim.bo.filetype
+	local word = vim.fn.expand('<cword>')
 
-  if filetype == 'vim' or filetype == 'help' then
-    vim.cmd('rightbelow vert h ' .. word)
-  elseif filetype == 'man' or filetype == 'just' then
-    vim.cmd('rightbelow vert Man ' .. word)
-  elseif vim.fn.expand('%:t') == 'Cargo.toml' then
-    local ok, crates = pcall(require, 'crates')
-    if ok and crates.popup_available() then
-      crates.show_popup()
-      return
-    end
-  end
+	if filetype == 'vim' or filetype == 'help' then
+		vim.cmd('rightbelow vert h ' .. word)
+	elseif filetype == 'man' or filetype == 'just' then
+		vim.cmd('rightbelow vert Man ' .. word)
+	elseif vim.fn.expand('%:t') == 'Cargo.toml' then
+		local ok, crates = pcall(require, 'crates')
+		if ok and crates.popup_available() then
+			crates.show_popup()
+			return
+		end
+	end
 
-  local clients = vim.lsp.get_clients({ bufnr = 0 })
-  if #clients > 0 then
-    vim.lsp.buf.hover()
-  else
-    vim.notify("No LSP or documentation available", vim.log.levels.INFO)
-  end
+	local clients = vim.lsp.get_clients({ bufnr = 0 })
+	if #clients > 0 then
+		vim.lsp.buf.hover()
+	else
+		vim.notify("No LSP or documentation available", vim.log.levels.INFO)
+	end
 end
 
 vim.keymap.set('n', '<C-F12>', require('telescope.builtin').lsp_document_symbols, {})
@@ -76,31 +76,31 @@ local diffview_state = 0
 local diffview_history_state = 0
 
 local function diffview_toggle()
-  if diffview_history_state == 1 then
-    diffview_history_state = 0
-    pcall(vim.cmd, "DiffviewClose")
-  end
-  if diffview_state == 0 then
-    diffview_state = 1
-    vim.cmd("DiffviewOpen")
-  else
-    diffview_state = 0
-    pcall(vim.cmd, "DiffviewClose")
-  end
+	if diffview_history_state == 1 then
+		diffview_history_state = 0
+		pcall(vim.cmd, "DiffviewClose")
+	end
+	if diffview_state == 0 then
+		diffview_state = 1
+		vim.cmd("DiffviewOpen")
+	else
+		diffview_state = 0
+		pcall(vim.cmd, "DiffviewClose")
+	end
 end
 
 local function diffview_history_toggle()
-  if diffview_state == 1 then
-    diffview_state = 0
-    pcall(vim.cmd, "DiffviewClose")
-  end
-  if diffview_history_state == 0 then
-    diffview_history_state = 1
-    vim.cmd("DiffviewFileHistory --follow")
-  else
-    diffview_history_state = 0
-    pcall(vim.cmd, "DiffviewClose")
-  end
+	if diffview_state == 1 then
+		diffview_state = 0
+		pcall(vim.cmd, "DiffviewClose")
+	end
+	if diffview_history_state == 0 then
+		diffview_history_state = 1
+		vim.cmd("DiffviewFileHistory --follow")
+	else
+		diffview_history_state = 0
+		pcall(vim.cmd, "DiffviewClose")
+	end
 end
 
 vim.keymap.set('n', '<M-0>', diffview_toggle)
@@ -111,59 +111,64 @@ vim.keymap.set('n', '<C-F2>', function() vim.cmd('DapTerminate') end, { silent =
 
 vim.keymap.set('n', '<S-F9>', function() vim.cmd('RustLsp debuggables') end, { silent = true })
 
-vim.keymap.set('n', '<C-e>', function() require('telescope').extensions.recent_files.pick() end, { noremap = true, silent = true })
+vim.keymap.set('n', '<C-e>', function() require('telescope').extensions.recent_files.pick() end,
+	{ noremap = true, silent = true })
 
 vim.keymap.set('n', 'cvx', ':Telescope session-lens<CR>', {})
 vim.keymap.set('n', 'cvr', function()
-  local find = vim.fn.input('Find: ')
-  if find == '' then return end
-  local replace = vim.fn.input('Replace with: ')
-  if replace == '' then return end
-  local esc_find = vim.fn.escape(find, '/')
-  local esc_replace = vim.fn.escape(replace, '/')
-  require('telescope.builtin').live_grep({
-    default_text = find,
-  })
+	local find = vim.fn.input('Find: ')
+	if find == '' then return end
+	local replace = vim.fn.input('Replace with: ')
+	if replace == '' then return end
+	local esc_find = vim.fn.escape(find, '/')
+	local esc_replace = vim.fn.escape(replace, '/')
+	require('telescope.builtin').live_grep({
+		default_text = find,
+	})
 end, { desc = 'Search and replace across project' })
 
 vim.keymap.set({ 'n', 't' }, '<M-F12>', function()
-  local current_win = vim.api.nvim_get_current_win()
-  local current_buf = vim.api.nvim_win_get_buf(current_win)
-  local current_buftype = vim.api.nvim_buf_get_option(current_buf, 'buftype')
-  if current_buftype == 'terminal' then
-    vim.cmd('wincmd p')
-  else
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      local buf = vim.api.nvim_win_get_buf(win)
-      if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
-        vim.api.nvim_set_current_win(win)
-        vim.cmd('startinsert')
-        return
-      end
-    end
-  end
+	local current_win = vim.api.nvim_get_current_win()
+	local current_buf = vim.api.nvim_win_get_buf(current_win)
+	local current_buftype = vim.api.nvim_buf_get_option(current_buf, 'buftype')
+	if current_buftype == 'terminal' then
+		vim.cmd('wincmd p')
+	else
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			local buf = vim.api.nvim_win_get_buf(win)
+			if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+				vim.api.nvim_set_current_win(win)
+				vim.cmd('startinsert')
+				return
+			end
+		end
+	end
 end, { noremap = true, silent = true })
 
 vim.keymap.set({ 'n', 't' }, '<F5>', function()
-  vim.fn.system('tmux resize-pane -D 1 && tmux resize-pane -U 1')
+	vim.fn.system('tmux resize-pane -D 1 && tmux resize-pane -U 1')
 end)
 
 vim.keymap.set('n', '<M-CR>', function() vim.lsp.buf.code_action() end, { silent = true })
 vim.keymap.set('v', '<M-CR>', function() vim.lsp.buf.code_action() end, { silent = true })
 
 vim.keymap.set('n', '<F4>', function()
-  local api = require('nvim-tree.api')
-  if api.tree.is_visible() then api.tree.close() else vim.cmd('DBUI') end
+	local api = require('nvim-tree.api')
+	if api.tree.is_visible() then api.tree.close() else vim.cmd('DBUI') end
 end, { desc = 'Toggle DBUI / tree' })
 
 vim.keymap.set('n', '<M-1>', function()
-  local api = require('nvim-tree.api')
-  if api.tree.is_visible() then api.tree.close() else api.tree.open() end
+	local api = require('nvim-tree.api')
+	if api.tree.is_visible() then api.tree.close() else api.tree.open() end
 end, { noremap = true, silent = true })
 
 vim.keymap.set('n', '<M-F1>', function()
-  local api = require('nvim-tree.api')
-  if api.tree.is_visible() then api.tree.focus() else api.tree.open(); api.tree.focus() end
+	local api = require('nvim-tree.api')
+	if api.tree.is_visible() then
+		api.tree.focus()
+	else
+		api.tree.open(); api.tree.focus()
+	end
 end, { noremap = true, silent = true })
 
 vim.keymap.set('n', '<C-M-p>', [[<cmd>horizontal resize -2<cr>]])
@@ -1091,15 +1096,18 @@ require('gitsigns').setup {
 --   :Grok            -> opens a vertical split on the right running grok (raw CLI reuse)
 --   :GrokCode        -> managed toggle (similar to :ClaudeCode)
 require("grok-code").setup({
-  -- Defaults are already tuned for "grok".
-  -- Keymaps (toggle + send actions) are managed by the plugin.
-  -- Assign keys here instead of writing full handler functions.
-  -- keymaps = {
-  --   send_file_ref  = '<leader>a',
-  --   send_range_ref = '<leader>l',   -- visual mode
-  --   send_line_ref  = '<leader>l',   -- normal mode
-  --   select         = '<leader>s',
-  -- },
+	-- refresh = {
+	-- 	enable = false
+	-- }
+	-- Defaults are already tuned for "grok".
+	-- Keymaps (toggle + send actions) are managed by the plugin.
+	-- Assign keys here instead of writing full handler functions.
+	-- keymaps = {
+	--   send_file_ref  = '<leader>a',
+	--   send_range_ref = '<leader>l',   -- visual mode
+	--   send_line_ref  = '<leader>l',   -- normal mode
+	--   select         = '<leader>s',
+	-- },
 })
 
 -- Global "coding agent file sync"
@@ -1107,50 +1115,50 @@ require("grok-code").setup({
 -- we want buffers to pick up changes reliably. This is the same principle whether
 -- you use the dedicated toggles or just manually do `:terminal grok`.
 do
-  vim.o.autoread = true
+	vim.o.autoread = true
 
-  vim.api.nvim_create_autocmd({
-    'FocusGained',
-    'BufEnter',
-    'CursorHold',
-    'CursorHoldI',
-    'TermLeave',
-  }, {
-    group = vim.api.nvim_create_augroup('AgentFileSync', { clear = true }),
-    callback = function()
-      if vim.fn.filereadable(vim.fn.expand('%')) == 1 then
-        vim.cmd('silent! checktime')
-      end
-    end,
-    desc = 'Reload buffers changed by external processes (Claude Code, Grok Build, etc.)',
-  })
+	vim.api.nvim_create_autocmd({
+		'FocusGained',
+		'BufEnter',
+		'CursorHold',
+		'CursorHoldI',
+		'TermLeave',
+	}, {
+		group = vim.api.nvim_create_augroup('AgentFileSync', { clear = true }),
+		callback = function()
+			if vim.fn.filereadable(vim.fn.expand('%')) == 1 then
+				vim.cmd('silent! checktime')
+			end
+		end,
+		desc = 'Reload buffers changed by external processes (Claude Code, Grok Build, etc.)',
+	})
 
-  -- Occasional poll when terminals exist (helps when agents are busy writing)
-  local agent_timer = vim.loop.new_timer()
-  if agent_timer then
-    agent_timer:start(1500, 1500, vim.schedule_wrap(function()
-      for _, win in ipairs(vim.api.nvim_list_wins()) do
-        local buf = vim.api.nvim_win_get_buf(win)
-        if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
-          vim.cmd('silent! checktime')
-          return
-        end
-      end
-    end))
-  end
+	-- Occasional poll when terminals exist (helps when agents are busy writing)
+	local agent_timer = vim.loop.new_timer()
+	if agent_timer then
+		agent_timer:start(1500, 1500, vim.schedule_wrap(function()
+			for _, win in ipairs(vim.api.nvim_list_wins()) do
+				local buf = vim.api.nvim_win_get_buf(win)
+				if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+					vim.cmd('silent! checktime')
+					return
+				end
+			end
+		end))
+	end
 
-  vim.api.nvim_create_autocmd('FileChangedShellPost', {
-    group = vim.api.nvim_create_augroup('AgentFileSyncNotify', { clear = true }),
-    callback = function()
-      vim.notify('Buffer reloaded (changed by agent in terminal)', vim.log.levels.INFO)
-    end,
-  })
+	vim.api.nvim_create_autocmd('FileChangedShellPost', {
+		group = vim.api.nvim_create_augroup('AgentFileSyncNotify', { clear = true }),
+		callback = function()
+			vim.notify('Buffer reloaded (changed by agent in terminal)', vim.log.levels.INFO)
+		end,
+	})
 end
 
 -- require("dev-tools").setup({
 --   bdd = {
 --     enabled = true,
---     display_mode = "float", 
+--     display_mode = "float",
 --   }
 -- })
 
@@ -1175,15 +1183,15 @@ end, { desc = "Tmux dummy resize" })
 -- Treesitter: install small curated list of parsers on startup
 -- (new nvim-treesitter API - old setup block was removed)
 local ts_parsers = {
-  "bash", "c", "cpp", "go", "javascript", "json", "lua",
-  "markdown", "python", "rust", "sql", "toml", "typescript", "vim", "yaml"
+	"bash", "c", "cpp", "go", "javascript", "json", "lua",
+	"markdown", "python", "rust", "sql", "toml", "typescript", "vim", "yaml"
 }
 require('nvim-treesitter').install(ts_parsers)
 
 -- Enable treesitter highlighting for the curated languages
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = ts_parsers,
-  callback = function(ev)
-    vim.treesitter.start(ev.buf)
-  end,
+	pattern = ts_parsers,
+	callback = function(ev)
+		vim.treesitter.start(ev.buf)
+	end,
 })

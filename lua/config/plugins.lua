@@ -79,6 +79,7 @@ local plugins = {
   'https://github.com/ray-x/go.nvim',
   'https://github.com/ray-x/guihua.lua',
   'https://github.com/saecki/crates.nvim',
+  "elixir-tools/elixir-tools.nvim",
 
   -- DAP
   'https://github.com/mfussenegger/nvim-dap',
@@ -125,7 +126,7 @@ local plugins = {
   },
   'https://github.com/paval-shlyk/session-todo.nvim',
   'https://github.com/paval-shlyk/dev-tools.nvim',
-  'https://github.com/paval-shlyk/grok-code.nvim',
+  { src = 'https://github.com/paval-shlyk/grok-code.nvim',    version = 'feature/send-notifications' },
   'https://github.com/greggh/claude-code.nvim',
   {
     src = 'https://github.com/rust-sailfish/sailfish',
