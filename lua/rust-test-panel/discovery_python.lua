@@ -56,7 +56,8 @@ function M.collect(bufnr)
       marks, qase_id = parse_decorators(parent, bufnr)
     end
 
-    local display = name
+    local formatter = require("rust-test-panel.formatter")
+    local display = formatter.format_python(name)
     if #marks > 0 then
       display = display .. "  [" .. table.concat(marks, ", ") .. "]"
     end

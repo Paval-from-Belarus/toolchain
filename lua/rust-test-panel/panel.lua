@@ -274,7 +274,9 @@ local function rename_test()
 
   vim.ui.input({ prompt = "Rename test: ", default = e.display }, function(new_display)
     if not new_display or vim.trim(new_display) == "" then return end
-    local new_name = formatter.to_snake(new_display)
+    local new_name = (state.filetype == "python")
+      and formatter.to_snake_python(new_display)
+      or formatter.to_snake(new_display)
     vim.schedule(function()
       if vim.api.nvim_win_is_valid(w) then
         vim.api.nvim_set_current_win(w)
@@ -384,6 +386,9 @@ function M.toggle(source_bufnr)
   vim.cmd("botright " .. WIDTH .. "vsplit")
   local win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_buf(win, buf)
+  -- Marks this window so the global <Tab> window-cycler (plugin/init.lua) skips it,
+  -- the same way it already skips terminal windows.
+  vim.w[win].rust_test_panel = true
   -- Use nvim_win_call + opt_local to set strictly window-local values
   -- (vim.wo[win] in Neovim 0.10 sets the global copy too, which breaks other windows)
   vim.api.nvim_win_call(win, function()

@@ -196,8 +196,8 @@ vim.keymap.set("n", "<Tab>", function()
 				local buf = vim.api.nvim_win_get_buf(next_win)
 				local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
 
-				-- If not a terminal, switch to it
-				if buftype ~= "terminal" then
+				-- If not a terminal or a marked side-panel (e.g. rust-test-panel), switch to it
+				if buftype ~= "terminal" and not vim.w[next_win].rust_test_panel then
 					vim.api.nvim_set_current_win(next_win)
 					return
 				end
