@@ -126,10 +126,11 @@ local plugins = {
   'https://github.com/folke/snacks.nvim',
   'https://gitlab.com/itaranto/plantuml.nvim',
   'https://github.com/junegunn/vim-github-dashboard',
-  {
-    src = 'https://github.com/iamcco/markdown-preview.nvim',
-    build = 'cd app && npx --yes yarn install',
-  },
+  -- {
+  --   src = 'https://github.com/iamcco/markdown-preview.nvim',
+  --   build = 'cd app && npx --yes yarn install',
+  -- },
+  'https://github.com/MeanderingProgrammer/render-markdown.nvim',
   { src = 'https://github.com/paval-shlyk/grok-code.nvim',    version = 'feature/send-notifications' },
   'https://github.com/greggh/claude-code.nvim',
   {

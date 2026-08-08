@@ -285,6 +285,31 @@ function _G.harpoon_statusline()
 	return table.concat(parts, ' ')
 end
 
+require('render-markdown').setup({
+	completions = { lsp = { enabled = true } },
+	-- Stay close to the source markdown; skip decorative defaults.
+	heading = {
+		sign = false,
+		icons = {}, -- keep '#' markers visible
+		backgrounds = {}, -- no full-width color bars
+	},
+	bullet = {
+		enabled = false, -- keep '-', '*', '+' as written
+	},
+	sign = {
+		enabled = false,
+	},
+	pipe_table = {
+		style = 'normal', -- no fancy box-drawing borders
+	},
+	dash = {
+		enabled = false,
+	},
+	link = {
+		enabled = false,
+	},
+})
+
 -- === Complex plugin configuration below ===
 
 require('go').setup()
