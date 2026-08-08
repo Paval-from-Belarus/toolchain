@@ -269,7 +269,8 @@ end
 
 -- Alternative navigation for when TAB is bound by OpenCode
 vim.keymap.set("n", "<C-Tab>", function()
-	if is_float_open() then
+	local float_is_open = is_documentation_float_open()
+	if float_is_open then
 		-- Focus the floating window
 		for _, win in ipairs(vim.api.nvim_list_wins()) do
 			local config = vim.api.nvim_win_get_config(win)
@@ -1184,14 +1185,24 @@ end, { desc = "Tmux dummy resize" })
 -- (new nvim-treesitter API - old setup block was removed)
 local ts_parsers = {
 	"bash", "c", "cpp", "go", "javascript", "json", "lua",
-	"markdown", "python", "rust", "sql", "toml", "typescript", "vim", "yaml"
+	"markdown", "python", "rust", "sql", "toml", "typescript", "vim", "yaml",
+	"elixir", "heex", "eex",
 }
 require('nvim-treesitter').install(ts_parsers)
 
--- Enable treesitter highlighting for the curated languages
+-- Filetypes that should enable treesitter highlighting.
+-- Note: filetype can differ from parser name (e.g. eelixir -> eex).
+local ts_filetypes = {
+	"bash", "c", "cpp", "go", "javascript", "json", "lua",
+	"markdown", "python", "rust", "sql", "toml", "typescript", "vim", "yaml",
+	"elixir", "heex", "eelixir",
+}
+
 vim.api.nvim_create_autocmd('FileType', {
-	pattern = ts_parsers,
+	pattern = ts_filetypes,
 	callback = function(ev)
-		vim.treesitter.start(ev.buf)
+		-- Prefer the mapped language (eelixir -> eex) when available
+		local lang = vim.treesitter.language.get_lang(ev.match)
+		pcall(vim.treesitter.start, ev.buf, lang)
 	end,
 })

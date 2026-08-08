@@ -54,7 +54,8 @@
     },
     "darcula-solid.nvim": {
       "rev": "d950b9ca20096313c435a93e57af7815766f3d3d",
-      "src": "https://github.com/briones-gabriel/darcula-solid.nvim"
+      "src": "https://github.com/briones-gabriel/darcula-solid.nvim",
+      "version": "'d950b9ca20096313c435a93e57af7815766f3d3d'"
     },
     "dev-tools.nvim": {
       "rev": "11215a87bad169e7a9245647d9a136535da834a4",
@@ -63,6 +64,10 @@
     "diffview.nvim": {
       "rev": "4516612fe98ff56ae0415a259ff6361a89419b0a",
       "src": "https://github.com/sindrets/diffview.nvim"
+    },
+    "elixir-tools.nvim": {
+      "rev": "defb94618c8cd7a8de5943bf09b25ec055263c19",
+      "src": "https://github.com/elixir-tools/elixir-tools.nvim"
     },
     "git-blame.nvim": {
       "rev": "5c536e2d4134d064aa3f41575280bc8a2a0e03d7",
@@ -78,7 +83,8 @@
     },
     "grok-code.nvim": {
       "rev": "2d7646e6568fce54776a708c0bd1963995018d5d",
-      "src": "https://github.com/paval-shlyk/grok-code.nvim"
+      "src": "https://github.com/paval-shlyk/grok-code.nvim",
+      "version": "'feature/send-notifications'"
     },
     "guihua.lua": {
       "rev": "f8e06bd8a26dee3377d63c2adf1e57cdb58ac474",

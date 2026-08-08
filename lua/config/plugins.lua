@@ -37,7 +37,10 @@ local plugins = {
   'https://github.com/nvim-neotest/nvim-nio',
 
   -- UI / appearance
-  'https://github.com/briones-gabriel/darcula-solid.nvim',
+  {
+    src = 'https://github.com/briones-gabriel/darcula-solid.nvim',
+    version = 'd950b9ca20096313c435a93e57af7815766f3d3d',
+  },
   'https://github.com/rktjmp/lush.nvim',
   'https://github.com/nvim-lualine/lualine.nvim',
   'https://github.com/nvim-tree/nvim-web-devicons',
@@ -79,7 +82,7 @@ local plugins = {
   'https://github.com/ray-x/go.nvim',
   'https://github.com/ray-x/guihua.lua',
   'https://github.com/saecki/crates.nvim',
-  "elixir-tools/elixir-tools.nvim",
+  'https://github.com/elixir-tools/elixir-tools.nvim',
 
   -- DAP
   'https://github.com/mfussenegger/nvim-dap',
@@ -202,6 +205,14 @@ pcall(function()
   }
 
   vim.g.have_nerd_font = true
+end)
+
+pcall(function()
+  require("elixir").setup({
+    nextls = { enable = false },
+    elixirls = { enable = true },
+    projectionist = { enable = true },
+  })
 end)
 
 M.specs = specs
