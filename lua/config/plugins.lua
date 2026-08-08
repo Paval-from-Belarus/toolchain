@@ -127,8 +127,6 @@ local plugins = {
     src = 'https://github.com/iamcco/markdown-preview.nvim',
     build = 'cd app && npx --yes yarn install',
   },
-  'https://github.com/paval-shlyk/session-todo.nvim',
-  'https://github.com/paval-shlyk/dev-tools.nvim',
   { src = 'https://github.com/paval-shlyk/grok-code.nvim',    version = 'feature/send-notifications' },
   'https://github.com/greggh/claude-code.nvim',
   {

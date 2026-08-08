@@ -943,11 +943,9 @@ require('lualine').setup {
 		lualine_a = { 'mode' },
 		lualine_b = { 'branch', 'diff', 'diagnostics' },
 		lualine_c = { { 'filename', path = 1 } },
-		lualine_x = {
-			{ require("session_todo").get_statusline, color = { fg = "#50fa7b" } }
-		},
-		lualine_y = { 'encoding', 'fileformat', 'filetype', 'progress' },
-		lualine_z = { 'location' }
+		lualine_x = { 'encoding', 'fileformat', 'filetype', 'progress' },
+		lualine_y = { 'location' },
+		lualine_z = {}
 
 	},
 
