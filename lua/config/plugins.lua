@@ -100,12 +100,16 @@ local plugins = {
   'https://github.com/windwp/nvim-autopairs',
   'https://github.com/junegunn/vim-easy-align',
   'https://github.com/kshenoy/vim-signature',
-  'https://github.com/pocco81/AutoSave.nvim',
+  -- 'https://github.com/pocco81/AutoSave.nvim',
   'https://github.com/rmagatti/auto-session',
   'https://github.com/LunarVim/bigfile.nvim',
   'https://github.com/uga-rosa/translate.nvim',
   'https://github.com/tpope/vim-sleuth',
   'https://github.com/MunifTanjim/prettier.nvim',
+  {
+    src = 'https://github.com/ThePrimeagen/harpoon',
+    version = 'harpoon2',
+  },
 
   -- Database
   'https://github.com/tpope/vim-dadbod',

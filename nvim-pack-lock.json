@@ -90,6 +90,11 @@
       "rev": "f8e06bd8a26dee3377d63c2adf1e57cdb58ac474",
       "src": "https://github.com/ray-x/guihua.lua"
     },
+    "harpoon": {
+      "rev": "87b1a3506211538f460786c23f98ec63ad9af4e5",
+      "src": "https://github.com/ThePrimeagen/harpoon",
+      "version": "'harpoon2'"
+    },
     "lualine.nvim": {
       "rev": "221ce6b2d999187044529f49da6554a92f740a96",
       "src": "https://github.com/nvim-lualine/lualine.nvim"
