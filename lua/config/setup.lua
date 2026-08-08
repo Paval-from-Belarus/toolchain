@@ -607,13 +607,6 @@ require('ufo').setup({
 		return { 'treesitter', 'indent' }
 	end
 })
--- require('auto-save').setup({
--- 	execution_message = {
--- 		message = function()
--- 			return ''
--- 		end,
--- 	}
--- })
 
 require('dapui').setup({
 	controls = {
