@@ -1,9 +1,5 @@
 {
   "plugins": {
-    "AutoSave.nvim": {
-      "rev": "979b6c82f60cfa80f4cf437d77446d0ded0addf0",
-      "src": "https://github.com/pocco81/AutoSave.nvim"
-    },
     "Comment.nvim": {
       "rev": "e30b7f2008e52442154b66f7c519bfd2f1e32acb",
       "src": "https://github.com/numToStr/Comment.nvim"
@@ -56,10 +52,6 @@
       "rev": "d950b9ca20096313c435a93e57af7815766f3d3d",
       "src": "https://github.com/briones-gabriel/darcula-solid.nvim",
       "version": "'d950b9ca20096313c435a93e57af7815766f3d3d'"
-    },
-    "dev-tools.nvim": {
-      "rev": "11215a87bad169e7a9245647d9a136535da834a4",
-      "src": "https://github.com/paval-shlyk/dev-tools.nvim"
     },
     "diffview.nvim": {
       "rev": "4516612fe98ff56ae0415a259ff6361a89419b0a",
@@ -148,7 +140,7 @@
       "src": "https://github.com/nvim-tree/nvim-tree.lua"
     },
     "nvim-treesitter": {
-      "rev": "4916d6592ede8c07973490d9322f187e07dfefac",
+      "rev": "c9f9ed6c1892f629ea399f4ee7905f2686fa13f2",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
@@ -189,16 +181,12 @@
       "src": "https://github.com/aveplen/ruscmd.nvim"
     },
     "rustaceanvim": {
-      "rev": "4136336ac7e0dcbb1ffc60263d68dab500a6d183",
+      "rev": "d16c6cf9adb062c415c2bb9780cd5064fa6609ca",
       "src": "https://github.com/mrcjkb/rustaceanvim"
     },
     "sailfish": {
       "rev": "5b5a33aa492260d3863e36b65e4ba5cf0102335b",
       "src": "https://github.com/rust-sailfish/sailfish"
-    },
-    "session-todo.nvim": {
-      "rev": "058a843ec94e19a40a2b321b5462d0c6ae5e2a37",
-      "src": "https://github.com/paval-shlyk/session-todo.nvim"
     },
     "snacks.nvim": {
       "rev": "882c996cf28183f4d63640de0b4c02ec886d01f2",
