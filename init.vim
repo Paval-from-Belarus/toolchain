@@ -92,7 +92,6 @@ Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-telescope/telescope-ui-select.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
-Plug 'smartpde/telescope-recent-files'
 Plug 'nvim-treesitter/nvim-treesitter', { 'do' : ':TSUpdate', 'branch': 'master' }
 Plug 'nvim-treesitter/playground'
 

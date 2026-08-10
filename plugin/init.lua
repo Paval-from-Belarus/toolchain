@@ -395,12 +395,7 @@ vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { desc = "Go 
 vim.keymap.set("n", "<F2>", function() vim.diagnostic.goto_next() end, opts)
 vim.keymap.set("n", "<S-F2>", function() vim.diagnostic.goto_prev() end, opts)
 
-require("telescope").load_extension("recent_files")
 local crates = require('crates')
-
-vim.api.nvim_set_keymap("n", "<C-e>",
-	[[<cmd>lua require('telescope').extensions.recent_files.pick()<CR>]],
-	{ noremap = true, silent = true })
 
 local builtin = require('telescope.builtin')
 local workspace_symbols_opt = {
@@ -413,7 +408,7 @@ local workspace_symbols_opt = {
 --builtin.lsp_workspace_symbols(workspace_symbols_opt)
 vim.keymap.set('n', '<C-F12>', builtin.lsp_document_symbols, {})
 -- vim.keymap.set('n', 'cvi', builtin.lsp_workspace_symbols, {})
-vim.keymap.set('n', 'cve', function() builtin.find_files({ hidden = true }) end, {})
+vim.keymap.set('n', '<C-e>', function() builtin.find_files({ hidden = true }) end, {})
 vim.keymap.set('n', 'cvf', function() builtin.live_grep({ additional_args = { "--hidden" } }) end, {})
 vim.keymap.set('n', 'cvq', builtin.quickfix, {})
 vim.keymap.set('n', 'cvo', crates.show_features_popup, {})
