@@ -217,11 +217,11 @@ vim.keymap.set("n", "<M-5>", function()
 	opts)
 
 local is_debug_enabled = false
--- vim.keymap.set("n", "<S-F9>", function()
---         is_debug_enabled = not is_debug_enabled
---         vim.cmd (":RustLsp debuggables<CR>")
--- end,
--- opts)
+vim.keymap.set("n", "<S-F9>", function()
+		is_debug_enabled = not is_debug_enabled
+		vim.cmd(":RustLsp debuggables<CR>")
+	end,
+	opts)
 vim.api.nvim_set_keymap('n', '<S-F9>', '', {
 	noremap = true,
 	silent = true,
@@ -390,6 +390,8 @@ vim.keymap.set("n", "<C-M-l>", function() vim.lsp.buf.format() end, { desc = "Fo
 vim.keymap.set("n", "g]", function() vim.lsp.buf.implementation() end, { desc = "Go to implementation of chosen one", })
 vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { desc = "Go to definition", })
 
+-- vim.keymap.set("n", "<F2>", function() vim.diagnostic.goto_next({ severity = { min = vim.diagnostic.severity.WARN } }) end, opts)
+-- vim.keymap.set("n", "<S-F2>", function() vim.diagnostic.goto_prev({ severity = { min = vim.diagnostic.severity.WARN } }) end, opts)
 vim.keymap.set("n", "<F2>", function() vim.diagnostic.goto_next() end, opts)
 vim.keymap.set("n", "<S-F2>", function() vim.diagnostic.goto_prev() end, opts)
 
@@ -579,7 +581,7 @@ vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
 vim.g.copilot_no_tab_map = true
 vim.g.copilot_filetypes = {
 	["*"] = true,
-	-- ["markdown"] = false,
+	["sshconfig"] = false,
 }
 
 vim.o.sessionoptions = "blank,buffers,curdir,help,tabpages,winsize,winpos,localoptions"
@@ -877,8 +879,8 @@ require('lualine').setup {
 		lualine_a = { 'mode' },
 		lualine_b = { 'branch', 'diff', 'diagnostics' },
 		lualine_c = { { 'filename', path = 1 } },
-		lualine_x = { 'encoding', 'fileformat', 'filetype' },
-		lualine_y = { 'progress' },
+		lualine_x = { { require("session_todo").get_statusline, color = { fg = "#50fa7b" } } },
+		lualine_y = { 'encoding', 'fileformat', 'filetype', 'progress' },
 		lualine_z = { 'location' }
 
 	},
@@ -906,15 +908,63 @@ vim.g.opencode_opts = {
 -- Required for `opts.events.reload`.
 vim.o.autoread = true
 
--- Recommended/example keymaps.
-vim.keymap.set({ "n", "x" }, "<leader>a", function() require("opencode").ask("@this: ", { submit = true }) end,
-	{ desc = "Ask opencode…" })
-vim.keymap.set({ "n", "x" }, "<leader>s", function() require("opencode").select() end,
-	{ desc = "Execute opencode action…" })
-vim.keymap.set("n", "<leader>l", function() return require("opencode").operator("@this ") .. "_" end,
-	{ desc = "Add line to opencode", expr = true })
--- vim.keymap.set({"n","t"}, "<M-s>", function() return require("opencode").command("session.list") end, { desc = "Show OpenCode sessions", expr = true })
-vim.keymap.set({ "n", "t" }, "cva", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
+local function setup_ai_keybindings(active_mode)
+	local bindings = {}
+
+	if active_mode == "opencode" then
+		bindings = {
+			{
+				mode = { "n", "x" },
+				key = "<leader>a",
+				fn = function()
+					require("opencode").ask("@this: ",
+						{ submit = true })
+				end,
+				opts = { desc = "Ask opencode…" }
+			},
+			{ mode = { "n", "x" }, key = "<leader>s", fn = function() require("opencode").select() end, opts = { desc = "Execute opencode action…" } },
+			{
+				mode = "n",
+				key = "<leader>l",
+				fn = function()
+					return require("opencode").operator("@this ") ..
+					    "_"
+				end,
+				opts = { desc = "Add line to opencode", expr = true }
+			},
+			{ mode = { "n", "t" }, key = "cva", fn = function() require("opencode").toggle() end, opts = { desc = "Toggle opencode" } },
+		}
+	elseif active_mode == "claude" then
+		require("claudecode").setup({
+			-- Top-level aliases are supported and forwarded to terminal config
+			git_repo_cwd = true
+		})
+
+		bindings = {
+			{ mode = { "n", "t" }, key = "cva",        cmd = "<cmd>ClaudeCode<cr>",            opts = { desc = "Toggle Claude" } },
+			-- { mode = { "n", "x" }, key = "<leader>s",  cmd = "<cmd>ClaudeCodeFocus<cr>",       opts = { desc = "Focus Claude" } },
+			{ mode = "n",          key = "<leader>r",  cmd = "<cmd>ClaudeCode --resume<cr>",   opts = { desc = "Resume Claude" } },
+			{ mode = "n",          key = "<leader>c",  cmd = "<cmd>ClaudeCode --continue<cr>", opts = { desc = "Continue Claude" } },
+			{ mode = "n",          key = "<leader>m",  cmd = "<cmd>ClaudeCodeSelectModel<cr>", opts = { desc = "Select Claude model" } },
+			{ mode = "n",          key = "<leader>a",  cmd = "<cmd>ClaudeCodeAdd %<cr>",       opts = { desc = "Add current buffer" } },
+			{ mode = { "n", "v" }, key = "<leader>l",  cmd = "<cmd>ClaudeCodeSend<cr>",        opts = { desc = "Send to Claude" } },
+			{ mode = { "n", "x" }, key = "<leader>da", cmd = "<cmd>ClaudeCodeDiffAccept<cr>",  opts = { desc = "Accept diff" } },
+			{ mode = "n",          key = "<leader>dd", cmd = "<cmd>ClaudeCodeDiffDeny<cr>",    opts = { desc = "Deny diff" } },
+		}
+	end
+
+	for _, b in ipairs(bindings) do
+		if b.fn then
+			vim.keymap.set(b.mode, b.key, b.fn, b.opts)
+		elseif b.cmd then
+			vim.keymap.set(b.mode, b.key, b.cmd, b.opts)
+		end
+	end
+end
+
+local active_mode = "claude"
+-- local active_mode = "opencode"
+setup_ai_keybindings(active_mode)
 
 local last_non_terminal_win = nil
 
@@ -968,6 +1018,15 @@ end, { noremap = true, silent = true })
 vim.keymap.set({ "n", "t" }, "<F5>", function()
 	vim.fn.system("tmux resize-pane -U 1 && tmux resize-pane -D 1")
 end, { noremap = true, silent = true, desc = "Refresh terminal view" })
+
+-- Associate justfile.local with justfile syntax
+vim.filetype.add({ filename = { ["justfile.local"] = "just" } })
+vim.filetype.add({ filename = { ["README"] = "markdown" } })
+
+vim.keymap.set({ "n" }, "<leader>tr", ":RustLsp run<CR>")
+vim.keymap.set({ "n" }, "<leader>tl", ":RustLsp testables<CR>")
+vim.keymap.set('n', '<C-PageUp>', ":RustLsp parentModule<CR>")
+
 
 
 

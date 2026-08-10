@@ -51,14 +51,15 @@ vim.api.nvim_create_autocmd('FileType', {
 require('mason').setup()
 require('mason-lspconfig').setup {
   automatic_enable = false,
-  ensure_installed = { 'lua_ls', 'taplo', 'yamlls', 'html', 'pyright', 'ts_ls', 'codebook', 'just', 'asm_lsp', 'buf_ls' }
+  ensure_installed = { 'lua_ls', 'taplo', 'yamlls', 'html', 'pyright', 'ts_ls', 'codebook', 'just', 'asm_lsp', 'buf_ls', 'harper_ls'}
 }
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
 local servers = { 'clangd', 'pyright', 'ts_ls', 'lua_ls',
   'yamlls', 'digestif', 'taplo', 'buf_ls', 'sqlls',
   'html', 'codebook-lsp', 'just',
-  'asm_lsp'
+  'asm_lsp', 'systemd_lsp', 'jdtls', 'terraformls', 'gopls', 'csharp_ls',
+  'harper_ls'
 }
 
 local is_first_delete = true
@@ -230,7 +231,7 @@ local opts         = {
   server = {
     -- on_attach is a callback called when the language server attachs to the buffer
     on_attach = on_attach,
-    settings = {
+    default_settings = {
       -- to enable rust-analyzer settings visit:
       -- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
       ["rust-analyzer"] = {

@@ -49,16 +49,15 @@ Plug 'hrsh7th/cmp-buffer'
 
 Plug 'L3MON4D3/LuaSnip'
 
-Plug 'mrcjkb/rustaceanvim'
+Plug 'mrcjkb/rustaceanvim', { 'tag': 'v8.0.5' }
 
 Plug 'windwp/nvim-autopairs'
 
 Plug 'nvim-lua/plenary.nvim'
 
-Plug 'github/copilot.vim'
+" Plug 'github/copilot.vim'
 
 Plug 'rmagatti/auto-session'
-Plug 'NickvanDyke/opencode.nvim'
 
 Plug 'folke/snacks.nvim'
 
@@ -106,8 +105,8 @@ Plug 'sindrets/diffview.nvim'
 
 Plug 'numToStr/Comment.nvim'
 
-Plug 'saecki/crates.nvim'
-" Plug 'paval-shlyk/crates.nvim', { 'branch': 'copilot/fix-feature-parsing-cargo-toml' }
+" Plug 'saecki/crates.nvim'
+Plug 'paval-shlyk/crates.nvim', { 'branch': 'fix-multiline-arrays' }
 
 Plug 'rust-sailfish/sailfish', { 'rtp': 'syntax/vim' }
 
@@ -118,9 +117,15 @@ Plug 'prabirshrestha/async.vim'
 
 
 Plug 'nvim-treesitter/nvim-treesitter-context' 
-Plug 'NickvanDyke/opencode.nvim'
+
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'folke/snacks.nvim'
+
+Plug 'paval-shlyk/session-todo.nvim'
+
+" they both use same bindings
+Plug 'coder/claudecode.nvim'
+" Plug 'NickvanDyke/opencode.nvim'
 
 call plug#end()
 
