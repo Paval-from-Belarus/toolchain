@@ -430,13 +430,13 @@ require('ufo').setup({
 		return { 'treesitter', 'indent' }
 	end
 })
-require('auto-save').setup({
-	execution_message = {
-		message = function()
-			return ''
-		end,
-	}
-})
+-- require('auto-save').setup({
+-- 	execution_message = {
+-- 		message = function()
+-- 			return ''
+-- 		end,
+-- 	}
+-- })
 
 require('dapui').setup({
 	controls = {
@@ -873,8 +873,13 @@ require('lualine').setup {
 	sections = {
 		lualine_a = { 'mode' },
 		lualine_b = { 'branch', 'diff', 'diagnostics' },
-		lualine_c = { { 'filename', path = 1 } },
-		-- lualine_x = { { require("session_todo").get_statusline, color = { fg = "#50fa7b" } } },
+		lualine_c = {
+			{ 'filename', path = 1 },
+			{
+				function() return _G.harpoon_statusline() end,
+				color = { fg = '#89b4fa' },
+			},
+		},
 		lualine_x = { 'encoding', 'fileformat', 'filetype', 'progress' },
 		lualine_y = { 'location' }
 
@@ -1027,6 +1032,135 @@ require("rust-test-panel").setup({ keymap = "<leader>tt" })
 
 
 
+local ok_harpoon, harpoon = pcall(require, 'harpoon')
+if ok_harpoon then
+	harpoon:setup({
+		settings = {
+			save_on_toggle = true,
+			sync_on_ui_close = true,
+		},
+	})
+
+	local function harpoon_refresh_status()
+		pcall(function() require('lualine').refresh() end)
+	end
+
+	vim.keymap.set('n', '<leader>ha', function()
+		harpoon:list():add()
+		harpoon_refresh_status()
+	end, { desc = 'Harpoon: pin file' })
+
+	vim.keymap.set('n', '<leader>hm', function()
+		harpoon.ui:toggle_quick_menu(harpoon:list())
+	end, { desc = 'Harpoon: menu' })
+
+	vim.keymap.set('n', '<leader>hM', function()
+		local list = harpoon:list()
+		local conf = require('telescope.config').values
+		local pickers = require('telescope.pickers')
+		local finders = require('telescope.finders')
+		local actions = require('telescope.actions')
+		local action_state = require('telescope.actions.state')
+
+		local entries = {}
+		for i, item in ipairs(list.items) do
+			local path = item.value or ''
+			table.insert(entries, {
+				idx = i,
+				path = path,
+				display = string.format('%d: %s', i, path),
+			})
+		end
+
+		pickers.new({}, {
+			prompt_title = 'Harpoon',
+			finder = finders.new_table({
+				results = entries,
+				entry_maker = function(entry)
+					return {
+						value = entry,
+						display = entry.display,
+						ordinal = entry.path,
+						path = entry.path,
+					}
+				end,
+			}),
+			previewer = conf.file_previewer({}),
+			sorter = conf.generic_sorter({}),
+			attach_mappings = function(prompt_bufnr, _)
+				actions.select_default:replace(function()
+					local selection = action_state.get_selected_entry()
+					actions.close(prompt_bufnr)
+					if selection and selection.value then
+						list:select(selection.value.idx)
+						harpoon_refresh_status()
+					end
+				end)
+				return true
+			end,
+		}):find()
+	end, { desc = 'Harpoon: Telescope picker' })
+
+	local function harpoon_select(i)
+		return function()
+			harpoon:list():select(i)
+			harpoon_refresh_status()
+		end
+	end
+
+	vim.keymap.set('n', '<M-2>', harpoon_select(1), { desc = 'Harpoon slot 1' })
+	vim.keymap.set('n', '<M-3>', harpoon_select(2), { desc = 'Harpoon slot 2' })
+	vim.keymap.set('n', '<M-4>', harpoon_select(3), { desc = 'Harpoon slot 3' })
+end
+
+--- Statusline helper: always-visible Harpoon pins (keys match <M-2..4>).
+function _G.harpoon_statusline()
+	local ok, h = pcall(require, 'harpoon')
+	if not ok then return '' end
+	local list = h:list()
+	if not list or not list.items or #list.items == 0 then return '' end
+
+	local cur = vim.fn.expand('%:p')
+	local keys = { '2', '3', '4' }
+	local parts = {}
+	for i, item in ipairs(list.items) do
+		if i > #keys then break end
+		local path = item.value or ''
+		local name = vim.fn.fnamemodify(path, ':t')
+		local abs = vim.fn.fnamemodify(path, ':p')
+		if abs == cur then
+			table.insert(parts, string.format('[%s:%s]', keys[i], name))
+		else
+			table.insert(parts, string.format('%s:%s', keys[i], name))
+		end
+	end
+	return table.concat(parts, ' ')
+end
+
+require('render-markdown').setup({
+	completions = { lsp = { enabled = true } },
+	-- Stay close to the source markdown; skip decorative defaults.
+	heading = {
+		sign = false,
+		icons = {}, -- keep '#' markers visible
+		backgrounds = {}, -- no full-width color bars
+	},
+	bullet = {
+		enabled = false, -- keep '-', '*', '+' as written
+	},
+	sign = {
+		enabled = false,
+	},
+	pipe_table = {
+		style = 'normal', -- no fancy box-drawing borders
+	},
+	dash = {
+		enabled = false,
+	},
+	link = {
+		enabled = false,
+	},
+})
 
 -- vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
 -- vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })

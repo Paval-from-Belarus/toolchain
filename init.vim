@@ -66,7 +66,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'rbong/vim-flog'
 Plug 'briones-gabriel/darcula-solid.nvim'
 Plug 'rktjmp/lush.nvim'
-Plug 'pocco81/AutoSave.nvim'
+" Plug 'pocco81/AutoSave.nvim'
 
 Plug 'williamboman/mason.nvim'
 Plug 'williamboman/mason-lspconfig.nvim'
@@ -86,7 +86,7 @@ Plug 'ray-x/go.nvim'
 Plug 'ray-x/guihua.lua'
 
 Plug 'f-person/git-blame.nvim'
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
+" Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
 Plug 'nvim-tree/nvim-tree.lua'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-telescope/telescope-ui-select.nvim'
@@ -106,6 +106,8 @@ Plug 'numToStr/Comment.nvim'
 
 " Plug 'saecki/crates.nvim'
 Plug 'paval-shlyk/crates.nvim', { 'branch': 'fix-multiline-arrays' }
+Plug 'https://github.com/ThePrimeagen/harpoon', { 'branch': 'harpoon2' }
+Plug 'https://github.com/MeanderingProgrammer/render-markdown.nvim'
 
 Plug 'rust-sailfish/sailfish', { 'rtp': 'syntax/vim' }
 
