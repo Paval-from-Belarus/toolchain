@@ -104,6 +104,8 @@ Plug 'sindrets/diffview.nvim'
 
 Plug 'numToStr/Comment.nvim'
 
+Plug 'folke/todo-comments.nvim'
+
 " Plug 'saecki/crates.nvim'
 Plug 'paval-shlyk/crates.nvim', { 'branch': 'fix-multiline-arrays' }
 Plug 'https://github.com/ThePrimeagen/harpoon', { 'branch': 'harpoon2' }

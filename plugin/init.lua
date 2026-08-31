@@ -417,6 +417,13 @@ vim.keymap.set('n', 'gr', builtin.lsp_references, {})
 vim.keymap.set('n', '<leader>ci', builtin.lsp_incoming_calls, {})
 vim.keymap.set('n', '<leader>co', builtin.lsp_outgoing_calls, {})
 
+require('todo-comments').setup({
+	search = {
+		args = { "--color=never", "--no-heading", "--with-filename", "--line-number", "--column", "--ignore-case" },
+	},
+})
+vim.keymap.set('n', 'cvt', '<cmd>TodoTelescope<cr>', { desc = 'Todo/Fixme comments (project-wide)' })
+
 vim.o.foldcolumn = '0' -- '0' is not bad
 vim.o.foldlevel = 99   -- Using ufo provider need a large value, feel free to decrease the value
 vim.o.foldlevelstart = 99
@@ -1148,19 +1155,20 @@ require('render-markdown').setup({
 	bullet = {
 		enabled = false, -- keep '-', '*', '+' as written
 	},
-	sign = {
-		enabled = false,
-	},
 	pipe_table = {
 		style = 'normal', -- no fancy box-drawing borders
-	},
-	dash = {
-		enabled = false,
 	},
 	link = {
 		enabled = false,
 	},
 })
+
+local function set_render_markdown_highlights()
+	vim.api.nvim_set_hl(0, '@markup.strong', { fg = '#E5C07B', bold = true })
+	vim.api.nvim_set_hl(0, '@markup.italic', { fg = '#8AABA6', italic = true })
+end
+set_render_markdown_highlights()
+vim.api.nvim_create_autocmd('ColorScheme', { callback = set_render_markdown_highlights })
 
 -- vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
 -- vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
