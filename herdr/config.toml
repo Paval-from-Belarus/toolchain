@@ -1,0 +1,58 @@
+onboarding = false
+[ui]
+agent_panel_sort = "priority"
+# Drop the outer frame around the whole terminal, keep only the lines between panes
+pane_outer_borders = false
+
+# Sidebar (workspace list) hidden by default; opens via workspace_picker (see [keys])
+sidebar_start_collapsed = true
+sidebar_collapsed_mode = "hidden"
+
+# Hide the top tab bar unless a workspace has more than one tab
+hide_tab_bar_when_single_tab = true
+
+[theme]
+name = "tokyo-night"
+# auto_switch = false
+
+[theme.custom]
+# Dim the inactive pane border color (default overlay0 #565f89) toward the
+# tokyo-night background (#1a1b26), so unfocused pane dividers fade out.
+# The focused pane's border still uses `accent` at full brightness, so it stays easy to spot.
+overlay0 = "#33364d"
+
+[keys]
+# tmux used prefix = ctrl+a (was rebound from the ctrl+b default)
+prefix = "ctrl+a"
+
+# workspace_picker = ["prefix+w", "ctrl+alt+tab"]
+
+# Extra toggle-sidebar binding alongside the default prefix+b
+toggle_sidebar = ["prefix+b", "prefix+ctrl+b"]
+
+# tmux: bind + split-window -h -c "#{pane_current_path}"  (side-by-side)
+# herdr's split_vertical = new pane to the RIGHT (side-by-side), matching -h
+split_vertical = "prefix+plus"
+
+# tmux: bind = split-window -v -c "#{pane_current_path}"  (stacked)
+# herdr's split_horizontal = new pane DOWN (stacked), matching -v
+split_horizontal = "prefix+="
+
+# tmux: bind -T root M-left/right/up/down select-pane -L/-R/-U/-D
+# these are direct (no prefix), same as tmux's root-table binding
+focus_pane_left = "alt+left"
+focus_pane_down = "alt+down"
+focus_pane_up = "alt+up"
+focus_pane_right = "alt+right"
+
+# tmux: bind -r ! / C-] / C-p / \; resize-pane -L/-R/-U/-D 10
+resize_pane_left = "prefix+!"
+resize_pane_right = "prefix+ctrl+]"
+resize_pane_up = "prefix+ctrl+p"
+resize_pane_down = "prefix+semicolon"
+
+# pj plugin: open its picker
+[[keys.command]]
+key = "prefix+ctrl+o"
+type = "plugin_action"
+command = "pj.open-picker"
