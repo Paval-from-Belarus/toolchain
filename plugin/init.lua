@@ -98,7 +98,7 @@ local function is_documentation_float_open()
 			local buf_filetype = vim.api.nvim_buf_get_option(buf, "filetype")
 
 			-- Only return true for markdown documentation windows
-			if buf_filetype == "markdown" or buf_filetype == "crates.nvim" then
+			if buf_filetype == "markdown" or buf_filetype == "crates.nvim" or vim.w[win].gitsigns_preview == "blame" then
 				return true, win
 			end
 		end
@@ -384,7 +384,8 @@ require('gitsigns').setup {
 
 vim.keymap.set('n', 'K', show_documentation, { silent = true })
 
-vim.keymap.set("n", "<S-F6>", function() vim.lsp.buf.rename() end, opts)
+-- was s-f6
+vim.keymap.set("n", "cvu", function() vim.lsp.buf.rename() end, opts)
 
 vim.keymap.set("n", "<C-M-l>", function() vim.lsp.buf.format() end, { desc = "Format buffer", })
 vim.keymap.set("n", "g]", function() vim.lsp.buf.implementation() end, { desc = "Go to implementation of chosen one", })
@@ -392,8 +393,8 @@ vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { desc = "Go 
 
 -- vim.keymap.set("n", "<F2>", function() vim.diagnostic.goto_next({ severity = { min = vim.diagnostic.severity.WARN } }) end, opts)
 -- vim.keymap.set("n", "<S-F2>", function() vim.diagnostic.goto_prev({ severity = { min = vim.diagnostic.severity.WARN } }) end, opts)
-vim.keymap.set("n", "<F2>", function() vim.diagnostic.goto_next() end, opts)
-vim.keymap.set("n", "<S-F2>", function() vim.diagnostic.goto_prev() end, opts)
+vim.keymap.set("n", "cvn", function() vim.diagnostic.goto_next() end, opts)
+vim.keymap.set("n", "cvp", function() vim.diagnostic.goto_prev() end, opts)
 
 local crates = require('crates')
 
@@ -406,7 +407,7 @@ local workspace_symbols_opt = {
 	}
 }
 --builtin.lsp_workspace_symbols(workspace_symbols_opt)
-vim.keymap.set('n', '<C-F12>', builtin.lsp_document_symbols, {})
+vim.keymap.set('n', 'cvy', builtin.lsp_document_symbols, {})
 -- vim.keymap.set('n', 'cvi', builtin.lsp_workspace_symbols, {})
 vim.keymap.set('n', '<C-e>', function() builtin.find_files({ hidden = true }) end, {})
 vim.keymap.set('n', 'cvf', function() builtin.live_grep({ additional_args = { "--hidden" } }) end, {})
@@ -419,7 +420,7 @@ vim.keymap.set('n', '<leader>co', builtin.lsp_outgoing_calls, {})
 
 require('todo-comments').setup({
 	search = {
-		args = { "--color=never", "--no-heading", "--with-filename", "--line-number", "--column", "--ignore-case" },
+		args = { "--no-heading", "--with-filename", "--line-number", "--column", "--ignore-case" },
 	},
 })
 vim.keymap.set('n', 'cvt', '<cmd>TodoTelescope<cr>', { desc = 'Todo/Fixme comments (project-wide)' })
@@ -661,7 +662,7 @@ end
 vim.keymap.set("n", "<F4>", toggle_db_view, { desc = "Open DBUI" })
 
 vim.keymap.set('n', '<M-1>', toggle_left_menu, { noremap = true, silent = true })
-vim.keymap.set('n', '<M-F1>', focus_left_menu, { noremap = true, silent = true })
+vim.keymap.set('n', 'cvm', focus_left_menu, { noremap = true, silent = true })
 
 local function on_session_save()
 	require('nvim-tree.api').tree.close()
@@ -971,7 +972,10 @@ setup_ai_keybindings(active_mode)
 
 local last_non_terminal_win = nil
 
-vim.keymap.set({ "n", "t" }, "<M-F12>", function()
+-- "cvs" is a literal-text hotkey sent by kitty (map ctrl+shift+s send_text all cvs)
+-- because <M-F12> doesn't reliably reach Neovim through herdr; kept as a fallback trigger too.
+-- "<M-F12>",
+vim.keymap.set({ "n", "t" }, "cvs", function()
 	local current_win = vim.api.nvim_get_current_win()
 	local current_buf = vim.api.nvim_win_get_buf(current_win)
 	local current_buftype = vim.api.nvim_buf_get_option(current_buf, "buftype")
